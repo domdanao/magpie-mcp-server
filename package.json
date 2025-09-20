@@ -46,10 +46,12 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.18.1",
     "axios": "^1.12.2",
+    "dotenv": "^17.2.2",
     "js-yaml": "^4.1.0",
     "zod": "^3.25.76"
   },
   "devDependencies": {
+    "@types/dotenv": "^6.1.1",
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^24.5.2",
     "nodemon": "^3.1.10",
