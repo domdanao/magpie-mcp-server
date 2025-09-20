@@ -45,14 +45,23 @@ class MagpieMCPServer {
 
     if (!config.publicKey || !config.secretKey) {
       console.error('Error: MAGPIE_PUBLIC_KEY and MAGPIE_SECRET_KEY environment variables are required');
-      console.error('Debug info:');
-      console.error('  MAGPIE_PUBLIC_KEY:', process.env.MAGPIE_PUBLIC_KEY ? '[SET]' : '[NOT SET]');
-      console.error('  MAGPIE_SECRET_KEY:', process.env.MAGPIE_SECRET_KEY ? '[SET]' : '[NOT SET]');
-      console.error('  Working directory:', process.cwd());
-      console.error('  All environment variables starting with MAGPIE_:');
-      Object.keys(process.env).filter(key => key.startsWith('MAGPIE_')).forEach(key => {
-        console.error(`    ${key}: ${process.env[key] ? '[SET]' : '[NOT SET]'}`);
-      });
+      console.error('');
+      console.error('Please ensure these environment variables are set in your Claude Desktop configuration:');
+      console.error('');
+      console.error('{');
+      console.error('  "mcpServers": {');
+      console.error('    "magpie": {');
+      console.error('      "command": "magpie-mcp-server",');
+      console.error('      "env": {');
+      console.error('        "MAGPIE_PUBLIC_KEY": "your_public_key_here",');
+      console.error('        "MAGPIE_SECRET_KEY": "your_secret_key_here",');
+      console.error('        "MAGPIE_TEST_MODE": "false"');
+      console.error('      }');
+      console.error('    }');
+      console.error('  }');
+      console.error('}');
+      console.error('');
+      console.error('Make sure to restart Claude Desktop after updating the configuration.');
       process.exit(1);
     }
 

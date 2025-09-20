@@ -369,7 +369,23 @@ yamllint api-reference/
 - Verify the configuration file path and JSON syntax
 - Check Claude Desktop logs for error messages
 - Ensure the server command and path are correct
-- Restart Claude Desktop after configuration changes
+- **Important:** Restart Claude Desktop completely after configuration changes
+- If environment variables aren't being passed, try using the full path approach:
+  ```json
+  {
+    "mcpServers": {
+      "magpie": {
+        "command": "node",
+        "args": ["/path/to/magpie-mcp-server/dist/index.js"],
+        "env": {
+          "MAGPIE_PUBLIC_KEY": "your_public_key_here",
+          "MAGPIE_SECRET_KEY": "your_secret_key_here",
+          "MAGPIE_TEST_MODE": "false"
+        }
+      }
+    }
+  }
+  ```
 
 **API authentication errors:**
 - Verify your Magpie API credentials are valid
