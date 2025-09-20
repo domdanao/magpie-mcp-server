@@ -45,6 +45,14 @@ class MagpieMCPServer {
 
     if (!config.publicKey || !config.secretKey) {
       console.error('Error: MAGPIE_PUBLIC_KEY and MAGPIE_SECRET_KEY environment variables are required');
+      console.error('Debug info:');
+      console.error('  MAGPIE_PUBLIC_KEY:', process.env.MAGPIE_PUBLIC_KEY ? '[SET]' : '[NOT SET]');
+      console.error('  MAGPIE_SECRET_KEY:', process.env.MAGPIE_SECRET_KEY ? '[SET]' : '[NOT SET]');
+      console.error('  Working directory:', process.cwd());
+      console.error('  All environment variables starting with MAGPIE_:');
+      Object.keys(process.env).filter(key => key.startsWith('MAGPIE_')).forEach(key => {
+        console.error(`    ${key}: ${process.env[key] ? '[SET]' : '[NOT SET]'}`);
+      });
       process.exit(1);
     }
 
