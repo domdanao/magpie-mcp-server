@@ -5,11 +5,11 @@
       "args": [
         "/absolute/path/to/ai-magpie-mcp/dist/index.js"
       ],
-      "env": {
-        "MAGPIE_API_KEY": "your_magpie_api_key_here",
-        "MAGPIE_SECRET_KEY": "your_magpie_secret_key_here",
-        "MAGPIE_TEST_MODE": "true"
-      }
+    "env": {
+      "MAGPIE_PUBLIC_KEY": "your_public_key_here",
+      "MAGPIE_SECRET_KEY": "your_secret_key_here",
+      "MAGPIE_TEST_MODE": "false"
+    }
     }
   }
 }

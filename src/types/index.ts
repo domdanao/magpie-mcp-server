@@ -1,7 +1,7 @@
 // Magpie API Configuration
 export interface MagpieConfig {
-  apiKey: string;
-  secretKey: string;
+  publicKey: string;  // Used for creating sources
+  secretKey: string;  // Used for all other operations (charges, checkout, etc.)
   baseUrl?: string;
   testMode?: boolean;
 }

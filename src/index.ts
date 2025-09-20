@@ -38,13 +38,13 @@ class MagpieMCPServer {
 
     // Initialize Magpie client with environment variables
     const config: MagpieConfig = {
-      apiKey: process.env.MAGPIE_API_KEY || '',
+      publicKey: process.env.MAGPIE_PUBLIC_KEY || '',
       secretKey: process.env.MAGPIE_SECRET_KEY || '',
-      testMode: process.env.MAGPIE_TEST_MODE === 'true',
+      testMode: process.env.MAGPIE_TEST_MODE === 'true', // Defaults to false (production)
     };
 
-    if (!config.apiKey || !config.secretKey) {
-      console.error('Error: MAGPIE_API_KEY and MAGPIE_SECRET_KEY environment variables are required');
+    if (!config.publicKey || !config.secretKey) {
+      console.error('Error: MAGPIE_PUBLIC_KEY and MAGPIE_SECRET_KEY environment variables are required');
       process.exit(1);
     }
 

@@ -2,7 +2,8 @@ import axios, { AxiosInstance, AxiosResponse, AxiosError } from 'axios';
 import { MagpieConfig, ApiResponse } from '../types';
 
 export class MagpieClient {
-  private paymentsApi: AxiosInstance;
+  private paymentsApiPublic: AxiosInstance;  // For source creation (uses public key)
+  private paymentsApiSecret: AxiosInstance;  // For charges and other operations (uses secret key)
   private checkoutApi: AxiosInstance;
   private requestsApi: AxiosInstance;
   private linksApi: AxiosInstance;
@@ -11,14 +12,15 @@ export class MagpieClient {
   constructor(config: MagpieConfig) {
     this.config = config;
     
-    // Create separate axios instances for different APIs
-    this.paymentsApi = this.createApiInstance('https://api.pay.magpie.im');
-    this.checkoutApi = this.createApiInstance('https://api.pay.magpie.im');
-    this.requestsApi = this.createApiInstance('https://request.magpie.im/api');
-    this.linksApi = this.createApiInstance('https://buy.magpie.im/api');
+    // Create separate axios instances for different APIs and authentication
+    this.paymentsApiPublic = this.createApiInstance('https://api.pay.magpie.im', true);  // Uses public key
+    this.paymentsApiSecret = this.createApiInstance('https://api.pay.magpie.im', false); // Uses secret key
+    this.checkoutApi = this.createApiInstance('https://api.pay.magpie.im', false);       // Uses secret key
+    this.requestsApi = this.createApiInstance('https://request.magpie.im/api', false);  // Uses secret key
+    this.linksApi = this.createApiInstance('https://buy.magpie.im/api', false);         // Uses secret key
   }
 
-  private createApiInstance(baseURL: string): AxiosInstance {
+  private createApiInstance(baseURL: string, usePublicKey: boolean = false): AxiosInstance {
     const instance = axios.create({
       baseURL,
       headers: {
@@ -29,7 +31,9 @@ export class MagpieClient {
 
     // Add request interceptor for authentication
     instance.interceptors.request.use((config) => {
-      const credentials = Buffer.from(`${this.config.apiKey}:${this.config.secretKey}`).toString('base64');
+      // Use public key for source creation, secret key for everything else
+      const authKey = usePublicKey ? this.config.publicKey : this.config.secretKey;
+      const credentials = Buffer.from(`${authKey}:`).toString('base64');
       config.headers.Authorization = `Basic ${credentials}`;
       return config;
     });
@@ -104,36 +108,39 @@ export class MagpieClient {
 
   // Payments API methods
   async createSource(data: any): Promise<ApiResponse> {
-    return this.makeRequest(this.paymentsApi, 'POST', '/v2/sources/', data);
+    // Source creation uses public key
+    return this.makeRequest(this.paymentsApiPublic, 'POST', '/v2/sources/', data);
   }
 
   async getSource(sourceId: string): Promise<ApiResponse> {
-    return this.makeRequest(this.paymentsApi, 'GET', `/v2/sources/${sourceId}`);
+    // Source retrieval uses secret key
+    return this.makeRequest(this.paymentsApiSecret, 'GET', `/v2/sources/${sourceId}`);
   }
 
   async createCharge(data: any): Promise<ApiResponse> {
-    return this.makeRequest(this.paymentsApi, 'POST', '/v2/charges/', data);
+    // All charge operations use secret key
+    return this.makeRequest(this.paymentsApiSecret, 'POST', '/v2/charges/', data);
   }
 
   async getCharge(chargeId: string): Promise<ApiResponse> {
-    return this.makeRequest(this.paymentsApi, 'GET', `/v2/charges/${chargeId}`);
+    return this.makeRequest(this.paymentsApiSecret, 'GET', `/v2/charges/${chargeId}`);
   }
 
   async listCharges(startAfter?: string): Promise<ApiResponse> {
     const params = startAfter ? `?start_after=${startAfter}` : '';
-    return this.makeRequest(this.paymentsApi, 'GET', `/v2/charges/${params}`);
+    return this.makeRequest(this.paymentsApiSecret, 'GET', `/v2/charges/${params}`);
   }
 
   async captureCharge(chargeId: string, data: any): Promise<ApiResponse> {
-    return this.makeRequest(this.paymentsApi, 'POST', `/v2/charges/${chargeId}/capture`, data);
+    return this.makeRequest(this.paymentsApiSecret, 'POST', `/v2/charges/${chargeId}/capture`, data);
   }
 
   async voidCharge(chargeId: string): Promise<ApiResponse> {
-    return this.makeRequest(this.paymentsApi, 'POST', `/v2/charges/${chargeId}/void`);
+    return this.makeRequest(this.paymentsApiSecret, 'POST', `/v2/charges/${chargeId}/void`);
   }
 
   async refundCharge(chargeId: string, data: any): Promise<ApiResponse> {
-    return this.makeRequest(this.paymentsApi, 'POST', `/v2/charges/${chargeId}/refund`, data);
+    return this.makeRequest(this.paymentsApiSecret, 'POST', `/v2/charges/${chargeId}/refund`, data);
   }
 
   // Checkout API methods

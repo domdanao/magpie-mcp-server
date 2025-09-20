@@ -41,7 +41,7 @@ npm run build
 The server requires Magpie API credentials to be provided via environment variables:
 
 ```bash
-export MAGPIE_API_KEY="your_api_key_here"
+export MAGPIE_PUBLIC_KEY="your_public_key_here"
 export MAGPIE_SECRET_KEY="your_secret_key_here"
 export MAGPIE_TEST_MODE="true"  # Optional: Use test mode (default: false)
 ```
@@ -55,9 +55,9 @@ Alternatively, create a `.env` file in your project directory:
 cp .env.example .env
 
 # Edit the .env file with your credentials
-MAGPIE_API_KEY=your_api_key_here
+MAGPIE_PUBLIC_KEY=your_public_key_here
 MAGPIE_SECRET_KEY=your_secret_key_here
-MAGPIE_TEST_MODE=true
+MAGPIE_TEST_MODE=false
 ```
 
 ### Using with Claude Desktop
@@ -73,9 +73,9 @@ Edit `~/Library/Application Support/Claude/claude_desktop_config.json`:
     "magpie": {
       "command": "magpie-mcp-server",
       "env": {
-        "MAGPIE_API_KEY": "your_api_key_here",
+        "MAGPIE_PUBLIC_KEY": "your_public_key_here",
         "MAGPIE_SECRET_KEY": "your_secret_key_here",
-        "MAGPIE_TEST_MODE": "true"
+        "MAGPIE_TEST_MODE": "false"
       }
     }
   }
@@ -95,7 +95,7 @@ For local development, you can use the built server directly:
       "command": "node",
       "args": ["/path/to/magpie-mcp-server/dist/index.js"],
       "env": {
-        "MAGPIE_API_KEY": "your_api_key_here",
+        "MAGPIE_PUBLIC_KEY": "your_public_key_here",
         "MAGPIE_SECRET_KEY": "your_secret_key_here",
         "MAGPIE_TEST_MODE": "true"
       }
@@ -279,7 +279,7 @@ module.exports = {
     name: 'magpie-mcp-server',
     script: 'dist/index.js',
     env: {
-      MAGPIE_API_KEY: 'your_api_key_here',
+      MAGPIE_PUBLIC_KEY: 'your_public_key_here',
       MAGPIE_SECRET_KEY: 'your_secret_key_here',
       MAGPIE_TEST_MODE: 'false'
     },
@@ -302,9 +302,9 @@ Run the server in a Docker container:
 docker build -t magpie-mcp-server .
 
 # Run container
-docker run -e MAGPIE_API_KEY=your_key \
-           -e MAGPIE_SECRET_KEY=your_secret \
-           -e MAGPIE_TEST_MODE=true \
+docker run -e MAGPIE_PUBLIC_KEY=your_public_key \
+           -e MAGPIE_SECRET_KEY=your_secret_key \
+           -e MAGPIE_TEST_MODE=false \
            magpie-mcp-server
 ```
 
