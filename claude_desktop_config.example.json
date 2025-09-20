@@ -1,15 +1,13 @@
 {
   "mcpServers": {
-    "magpie-payments": {
-      "command": "node",
-      "args": [
-        "/absolute/path/to/ai-magpie-mcp/dist/index.js"
-      ],
-    "env": {
-      "MAGPIE_PUBLIC_KEY": "your_public_key_here",
-      "MAGPIE_SECRET_KEY": "your_secret_key_here",
-      "MAGPIE_TEST_MODE": "false"
-    }
+    "magpie": {
+      "command": "npx",
+      "args": ["-y", "magpie-mcp-server"],
+      "env": {
+        "MAGPIE_PUBLIC_KEY": "your_public_key_here",
+        "MAGPIE_SECRET_KEY": "your_secret_key_here",
+        "MAGPIE_TEST_MODE": "false"
+      }
     }
   }
 }

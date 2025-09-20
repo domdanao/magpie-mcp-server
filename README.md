@@ -17,22 +17,39 @@ The Magpie MCP Server enables AI agents to integrate with Magpie's comprehensive
 
 ### Prerequisites
 
-- Node.js 18+ 
-- npm or yarn
+- Node.js 18+
+- npm (for npx)
 - Magpie API credentials (Public Key and Secret Key)
   - **Public Key**: Used for creating payment sources only
   - **Secret Key**: Used for all other operations (charges, checkout, payment requests, links)
 
-### Install from npm (when published)
+### Recommended: NPX (No Installation Required)
+
+The easiest way to use the Magpie MCP server is with `npx` - no installation needed! Just add the configuration to Claude Desktop and it will automatically download and run the latest version.
+
+**Benefits:**
+- ✅ Always uses the latest version
+- ✅ No manual installation or updates
+- ✅ No PATH configuration needed
+- ✅ Works across all platforms
+
+### Alternative: Global Installation
+
+For better performance or offline usage, you can install globally:
 
 ```bash
 npm install -g magpie-mcp-server
 ```
 
-### Build from source
+**Benefits:**
+- ✅ Faster startup (~50ms vs ~200ms)
+- ✅ Works offline after installation
+- ✅ Version control (pin to specific versions)
+
+### Advanced: Build from Source
 
 ```bash
-git clone https://github.com/your-org/magpie-mcp-server
+git clone https://github.com/dominickdanao/magpie-mcp-server
 cd magpie-mcp-server
 npm install
 npm run build
@@ -75,8 +92,31 @@ MAGPIE_TEST_MODE=false
 
 Add the server to your Claude Desktop configuration file:
 
-#### macOS
-Edit `~/Library/Application Support/Claude/claude_desktop_config.json`:
+#### Recommended: NPX Configuration
+
+Edit your Claude Desktop config:
+- **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+- **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+
+```json
+{
+  "mcpServers": {
+    "magpie": {
+      "command": "npx",
+      "args": ["-y", "magpie-mcp-server"],
+      "env": {
+        "MAGPIE_PUBLIC_KEY": "your_public_key_here",
+        "MAGPIE_SECRET_KEY": "your_secret_key_here",
+        "MAGPIE_TEST_MODE": "false"
+      }
+    }
+  }
+}
+```
+
+#### Alternative: Global Installation Configuration
+
+If you installed globally with `npm install -g magpie-mcp-server`:
 
 ```json
 {
@@ -93,8 +133,7 @@ Edit `~/Library/Application Support/Claude/claude_desktop_config.json`:
 }
 ```
 
-#### Windows
-Edit `%APPDATA%\\Claude\\claude_desktop_config.json` with the same configuration.
+**Important**: Restart Claude Desktop completely after updating the configuration.
 
 #### Local Development Setup
 For local development, you can use the built server directly:
@@ -368,9 +407,11 @@ yamllint api-reference/
 **Claude Desktop integration issues:**
 - Verify the configuration file path and JSON syntax
 - Check Claude Desktop logs for error messages
-- Ensure the server command and path are correct
 - **Important:** Restart Claude Desktop completely after configuration changes
-- If environment variables aren't being passed, try using the full path approach:
+- **Recommended:** Use the NPX approach to avoid PATH and installation issues
+- If NPX fails, check internet connectivity (NPX requires network access)
+- If using global installation and getting "command not found", switch to NPX approach
+- For global installation PATH issues, try the full path approach:
   ```json
   {
     "mcpServers": {
