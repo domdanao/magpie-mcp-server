@@ -60,7 +60,7 @@ class MagpieMCPServer {
       publicKey: process.env.MAGPIE_PUBLIC_KEY || '',
       secretKey: process.env.MAGPIE_SECRET_KEY || '',
       testMode: process.env.MAGPIE_TEST_MODE === 'true', // Defaults to false (production)
-      paymentsBaseUrl: process.env.MAGPIE_PAYMENTS_BASE_URL || 'https://api.pay.magpie.im',
+      paymentsBaseUrl: process.env.MAGPIE_PAYMENTS_BASE_URL || 'https://api.magpie.im',
       checkoutBaseUrl: process.env.MAGPIE_CHECKOUT_BASE_URL || 'https://api.pay.magpie.im',
       requestsBaseUrl: process.env.MAGPIE_REQUESTS_BASE_URL || 'https://request.magpie.im/api',
       linksBaseUrl: process.env.MAGPIE_LINKS_BASE_URL || 'https://buy.magpie.im/api',

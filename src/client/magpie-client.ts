@@ -13,7 +13,8 @@ export class MagpieClient {
     this.config = config;
 
     // Create separate axios instances for different APIs and authentication
-    const paymentsBaseUrl = config.paymentsBaseUrl || 'https://api.pay.magpie.im';
+    // Using exact URLs from OpenAPI specifications
+    const paymentsBaseUrl = config.paymentsBaseUrl || 'https://api.magpie.im';
     const checkoutBaseUrl = config.checkoutBaseUrl || 'https://api.pay.magpie.im';
     const requestsBaseUrl = config.requestsBaseUrl || 'https://request.magpie.im/api';
     const linksBaseUrl = config.linksBaseUrl || 'https://buy.magpie.im/api';
