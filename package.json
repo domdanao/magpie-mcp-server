@@ -34,13 +34,13 @@
   ],
   "author": "Dominick Danao <dominick@example.com>",
   "license": "MIT",
-  "homepage": "https://github.com/dominickdanao/magpie-mcp-server#readme",
+  "homepage": "https://github.com/domdanao/magpie-mcp-server#readme",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/dominickdanao/magpie-mcp-server.git"
+    "url": "git+https://github.com/domdanao/magpie-mcp-server.git"
   },
   "bugs": {
-    "url": "https://github.com/dominickdanao/magpie-mcp-server/issues"
+    "url": "https://github.com/domdanao/magpie-mcp-server/issues"
   },
   "type": "commonjs",
   "dependencies": {
