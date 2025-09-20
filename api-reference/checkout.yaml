@@ -1,0 +1,723 @@
+openapi: 3.0.2
+info:
+  title: Magpie Checkout API
+  description: The Magpie Checkout API allows you to create and manage Checkout Sessions. A Checkout Session represents a customer's session as they pay for one or more items.
+  version: 1.0.0
+servers:
+  - url: https://api.pay.magpie.im/
+    description: Production server for Magpie Checkout API
+paths:
+  /:
+    post:
+      tags:
+        - Checkout Sessions
+      summary: Create a Session
+      description: Creates a sessions object
+      operationId: create-session
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSessionSerializer'
+            examples:
+              payment:
+                summary: Payment mode
+                description: Use this when you want to collect one-time payments
+                value:
+                  currency: php
+                  cancel_url: https://example.com/cancel
+                  line_items:
+                    - name: Magpie Tumbler
+                      quantity: 1
+                      amount: 5000
+                  mode: payment
+                  payment_method_types:
+                    - card
+                    - bpi
+                    - gcash
+                    - maya
+                    - alipay
+                    - unionpay
+                    - wechat
+                  success_url: https://example.com/success
+              setup:
+                summary: Setup mode
+                description: Use this to authorize a payment and capture it later. Only works with card payments.
+                value:
+                  currency: php
+                  cancel_url: https://example.com/cancel
+                  line_items:
+                    - name: Magpie Tumbler
+                      quantity: 1
+                      amount: 5000
+                  mode: setup
+                  payment_method_types:
+                    - card
+                  success_url: https://example.com/success
+              subscription:
+                summary: Subscription mode
+                description: Use this to collect payment information from your customer to charge them later for recurring payments. Only works on card payments.
+                value:
+                  currency: php
+                  cancel_url: https://example.com/cancel
+                  line_items:
+                    - name: Magpie Tumbler
+                      quantity: 1
+                      amount: 5000
+                  mode: subscription
+                  payment_method_types:
+                    - card
+                  success_url: https://example.com/success
+              save_card:
+                summary: Save card mode
+                description: Use this to collect and save a card information to a customer, also know as card vaulting. Only works on card payments.
+                value:
+                  currency: php
+                  cancel_url: https://example.com/cancel
+                  mode: save_card
+                  payment_method_types:
+                    - card
+                  success_url: https://example.com/success
+        required: true
+        example:
+          currency: php
+          cancel_url: https://example.com/cancel
+          line_items:
+            - name: Magpie Tumbler
+              quantity: 1
+              amount: 5000
+          mode: payment
+          payment_method_types:
+            - card
+            - bpi
+            - gcash
+            - maya
+            - alipay
+            - unionpay
+            - wechat
+          success_url: https://example.com/success
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadSessionSerializer'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - HTTPBasic: []
+    get:
+      tags:
+        - Checkout Sessions
+      summary: List all Checkout Sessions
+      description: Returns a list of Checkouts Sessions
+      operationId: list-sessions
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ListSessionsSerializer'
+      security:
+        - HTTPBasic: []
+  /{id}:
+    get:
+      tags:
+        - Checkout Sessions
+      summary: Retrieve a Session
+      description: Retrieves a Session object
+      operationId: retrieve-session
+      parameters:
+        - name: id
+          in: path
+          description: The ID of the Checkout Session to retrieve
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadSessionSerializer'
+        '404':
+          description: Session not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPNotFoundError'
+      security:
+        - HTTPBasic: []
+  /{id}/expire:
+    post:
+      tags:
+        - Checkout Sessions
+      summary: Expire a Session
+      description: A Session can be expired when it has a status of unpaid. After a Session expires, a customer can't complete or pay a Session and customers loading the Session should see a message saying the Session is expired.
+      operationId: expire-session
+      parameters:
+        - name: id
+          in: path
+          description: The ID of the Checkout Session to expire
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadSessionSerializer'
+        '404':
+          description: Session not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPNotFoundError'
+      security:
+        - HTTPBasic: []
+  /{id}/capture:
+    post:
+      tags:
+        - Checkout Sessions
+      summary: Capture a Session
+      description: A Session can be captured when it has a status of `authorized`. After a Session is captured, the payment is processed and the Session is marked as paid.
+      operationId: capture-session
+      parameters:
+        - name: id
+          in: path
+          description: The ID of the Checkout Session to capture
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                amount:
+                  title: Amount
+                  description: The amount to capture, which must be less than or equal to the authorized amount. If not provided, will capture the full authorized amount.
+                  type: integer
+                  example: 5000
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadSessionSerializer'
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+        '404':
+          description: Session not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPNotFoundError'
+      security:
+        - HTTPBasic: []
+components:
+  schemas:
+    AddressSerializer:
+      title: Address
+      description: Address information collected from the customer.
+      properties:
+        name:
+          description: Customer name
+          type: string
+          example: Gerry Isaac
+        line1:
+          description: Address line 1 (e.g., house number, street, or company name).
+          type: string
+          example: '#123 JP Rizal St.'
+        line2:
+          description: Address line 2 (e.g., apartment, suite, or building).
+          type: string
+        barangay:
+          description: Suburb, town, village, or district.
+          type: string
+          example: San Antonio
+        city:
+          description: City or municipality.
+          type: string
+          example: Makati City
+        state:
+          description: State, county, province, or region.
+          type: string
+          example: Metro Manila
+        postal_code:
+          description: ZIP or postal code.
+          type: string
+          example: 1200
+        country:
+          description: Two-letter ISO country code.
+          type: string
+          example: PH
+    BrandingType:
+      title: Branding
+      description: Details on branding elements to apply when rendering this Checkout Session.
+      type: object
+      properties:
+        icon:
+          description: A secure URL to an image icon
+          type: string
+          nullable: true
+          example: https://example.com/icon.png
+        logo:
+          description: A secure URL to an image logo
+          type: string
+          nullable: true
+          example: https://example.com/logo.png
+        use_logo:
+          description: Has the value of true if logo should be rendered in payment page or false if icon should be used.
+          type: boolean
+          example: true
+        primary_color:
+          description: A hex color code that will be used as background color of the payment page
+          type: string
+          nullable: true
+          example: '#FFFFFF'
+        secondary_color:
+          description: A hex color code that will be used as background color of the submit or PAY button
+          type: string
+          nullable: true
+          example: '#4f99fe'
+    BillingAddressCollection:
+      title: BillingAddressCollection
+      description: Describes whether Checkout should collect the customer's billing address.
+      type: string
+      enum:
+        - auto
+        - required
+      default: auto
+      example: required
+    CreateSessionSerializer:
+      title: CreateSessionSerializer
+      required:
+        - cancel_url
+        - currency
+        - line_items
+        - payment_method_types
+        - success_url
+      properties:
+        bank_code:
+          description: A custom code provided by a bank you want to use for online banking payment methods
+          type: string
+          example: null
+        branding:
+          allOf:
+            - $ref: '#/components/schemas/BrandingType'
+        billing_address_collection:
+          allOf:
+            - $ref: '#/components/schemas/BillingAddressCollection'
+        cancel_url:
+          description: Customers will be directed to this URL if they decide to cancel payment and return to your website.
+          type: string
+          example: https://example.com/cancel
+        client_reference_id:
+          description: A unique string to reference the Checkout Session. This can be a customer ID, a card ID, or similar, and can be used to reconcile the Session with your internal systems.
+          type: string
+          example: null
+        currency:
+          description: Three-letter [ISO currency code](https://www.iso.org/iso-4217-currency-codes.html), in lowercase. Must be a supported currency.
+          type: string
+          example: php
+        customer:
+          description: The ID of an existing `customer` that will be associated with this Checkout Session. This is used to prefill the customer-related fields like email address, name and phone on the payment page.
+          type: string
+          example: cus_ktDqQST3lm91sZ7y
+        customer_email:
+          description: Email address of customer. This is used to prefill the email field on the payment page.
+          type: string
+          example: jerry.isaac@email.com
+        customer_name:
+          description: Name of customer. This is used to prefill the name field on the payment page.
+          type: string
+          example: Gerry Isaac
+        customer_name_collection:
+          description: Describes whether Checkout should collect the customer's name.
+          type: boolean
+          example: true
+        customer_phone:
+          description: Phone number of customer. This is used to prefill the phone field on the payment page.
+          type: string
+          example: '+639123456789'
+        description:
+          description: If provided, Checkout will use this value as description of the `charge`.
+          type: string
+          example: Purchase of Magpie Tumbler
+        line_items:
+          title: LineItem[]
+          description: A list of items the customer is purchasing. Each item is an object with the following properties.
+          type: array
+          items:
+            $ref: '#/components/schemas/LineItemSerializer'
+        locale:
+          description: The IETF language tag of the locale Checkout is displayed in. Defaults to `en`. As of current version, Checkout will not yet support other locales.
+          type: string
+          enum:
+            - en
+          example: en
+        metadata:
+          description: A set of key-value pairs that you can attach to a Checkout Session object. It can be useful for storing additional information about the session in a structured format.
+          type: object
+          additionalProperties:
+            type: string
+          example: { 'PO Number': '123456' }
+        mode:
+          description: The mode of the Checkout Session. Required when creating a Checkout Session.
+          type: string
+          enum:
+            - payment
+            - setup
+            - subscription
+            - save_card
+          example: payment
+        payment_method_types:
+          description: A list of the types of payment methods (e.g., `card`) this Checkout Session can accept.
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentMethodType'
+          example:
+            - card
+            - bpi
+            - gcash
+            - maya
+            - alipay
+            - unionpay
+            - wechat
+        phone_number_collection:
+          description: Describes whether Checkout should collect the customer's phone number.
+          type: boolean
+          example: true
+        shipping_address_collection:
+          allOf:
+            - $ref: '#/components/schemas/ShippingAddressCollection'
+        submit_type:
+          description: Describes the type of transaction being performed by Checkout in order to customize relevant text on the page, such as the submit button. `submit_type` can only be specified on Checkout Session in `payment` mode, but not on other modes.
+          type: string
+          enum:
+            - pay
+            - book
+            - donate
+            - send
+          example: pay
+        success_url:
+          description: Customers will be directed to this URL after a successful payment.
+          type: string
+          example: https://example.com/success
+    HTTPNotFoundError:
+      title: HTTPNotFoundError
+      type: object
+      properties:
+        message:
+          title: Error message
+          type: string
+          example: Session id does not exist
+    HTTPValidationError:
+      title: HTTPValidationError
+      type: object
+      properties:
+        message:
+          title: Error message
+          type: array
+          items:
+            type: string
+          example: ['currency is required']
+        error:
+          title: Error type
+          type: string
+          example: Bad Request
+        statusCode:
+          title: Error code
+          type: integer
+          example: 400
+    LineItemSerializer:
+      title: LineItem
+      description: A list of items the customer is purchasing. Required unless `save_card` mode.
+      type: object
+      required:
+        - amount
+        - name
+        - quantity
+      properties:
+        amount:
+          description: Unit amount of the product in cents represented as a whole integer.
+          type: integer
+          example: 5000
+        description:
+          description: A description of the product
+          type: string
+          nullable: true
+        image:
+          description: A secure URL to an image of the product
+          type: string
+          nullable: true
+        name:
+          description: The name of the product
+          type: string
+        quantity:
+          description: The quantity of the products being purchased
+          type: integer
+          example: 1
+          minimum: 0
+    ListSessionsSerializer:
+      title: ListSessionsSerializer
+      type: array
+      items:
+        $ref: '#/components/schemas/ReadSessionSerializer'
+    Merchant:
+      description: Contains the merchant details that created this Checkout Session
+      properties:
+        name:
+          description: Name of the merchant
+          type: string
+          example: Magpie Shop
+        support_email:
+          description: Email address of the merchant's support team
+          type: string
+          nullable: true
+          example: support@merchant.com
+        support_phone:
+          description: Phone number of the merchant's support team
+          type: string
+          nullable: true
+          example: null
+    PaymentMethodType:
+      title: PaymentMethod
+      description: The payment method types that the Checkout Session is allowed to use. `gcash` payment method requires additional approval.
+      type: string
+      enum:
+        - card
+        - bpi
+        - gcash
+        - maya
+        - alipay
+        - unionpay
+        - wechat
+    PaymentStatusType:
+      description: The payment status of the Checkout Session. Use this value to decide when to fulfill your customer's order.
+      type: string
+      enum:
+        - paid
+        - unpaid
+        - authorized
+        - expired
+      example: unpaid
+    ReadSessionSerializer:
+      title: ReadSessionSerializer
+      properties:
+        id:
+          description: Unique identifier for the Session object.
+          type: string
+          example: cs_ktDqQST3lm91sZ7y
+        object:
+          description: String representing the object's type. Objects of the same type share the same value.
+          type: string
+          value: checkout.session
+        amount_subtotal:
+          description: Total of all items before discounts or taxes are applied. Amount in cents represented as whole integer.
+          type: integer
+          example: 5000
+        amount_total:
+          description: Total of all items after discounts and taxes are applied. Amount in cents represented as whole integer.
+          type: integer
+          example: 5000
+        bank_code:
+          description: A custom code provided by a bank you want to use for online banking payment methods
+          type: string
+          nullable: true
+          example: null
+        branding:
+          allOf:
+            - $ref: '#/components/schemas/BrandingType'
+        billing:
+          description: The customer's billing address.
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/AddressSerializer'
+        billing_address_collection:
+          title: ''
+          allOf:
+            - $ref: '#/components/schemas/BillingAddressCollection'
+        cancel_url:
+          description: The URL the customer will be directed to if they decide to cancel payment and return to your website.
+          type: string
+          example: https://example.com/cancel
+        client_reference_id:
+          description: A unique string to reference the Checkout Session. This can be a customer ID, a card ID, or similar, and can be used to reconcile the Session with your internal systems.
+          type: string
+          example: null
+        created_at:
+          description: The date and time the Checkout Session was created.
+          type: string
+          format: date-time
+          example: 2021-09-01T08:00:00Z
+        currency:
+          description: Three-letter [ISO currency code](https://www.iso.org/iso-4217-currency-codes.html), in lowercase. Must be a supported currency.
+          type: string
+          example: php
+        customer:
+          description: The ID of an existing customer that will be associated with this Checkout Session.
+          type: string
+          example: cus_ktDqQST3lm91sZ7y
+        customer_email:
+          description: Email address of customer.
+          type: string
+          example: gerry.isaac@email.com
+        customer_name:
+          description: Name of customer.
+          type: string
+          example: Gerry Isaac
+        customer_name_collection:
+          description: Describes whether Checkout should collect the customer's name.
+          type: boolean
+          example: true
+        customer_phone:
+          description: Phone number of customer.
+          type: string
+          example: '+639123456789'
+        description:
+          description: If provided, Checkout will use this value as description of the `charge`.
+          type: string
+          example: Purchase of Magpie Tumbler
+        expires_at:
+          description: The date and time the Checkout Session will expire.
+          type: string
+          format: date-time
+          example: 2021-09-02T08:00:00Z
+        last_updated:
+          description: The date and time the Checkout Session was last updated.
+          type: string
+          format: date-time
+          example: 2021-09-01T08:00:00Z
+        line_items:
+          title: LineItem[]
+          description: The line items purchased by the customer.
+          type: array
+          items:
+            $ref: '#/components/schemas/LineItemSerializer'
+          example:
+            - name: Magpie Tumbler
+              quantity: 1
+              amount: 5000
+        livemode:
+          description: Has the value of `true` if the object exists in live mode or the value of `false` if the object exists in test mode.
+          type: boolean
+          example: true
+        locale:
+          description: The IETF language tag of the locale Checkout is displayed in.
+          type: string
+          enum:
+            - en
+          example: en
+        merchant:
+          description: Contains the merchant details that created this Checkout Session
+          allOf:
+            - $ref: '#/components/schemas/Merchant'
+        metadata:
+          description: A set of key-value pairs that you can attach to a Checkout Session object.
+          type: object
+          additionalProperties:
+            type: string
+          example:
+            'PO Number': '123456'
+        mode:
+          description: The mode of the Checkout Session.
+          type: string
+          enum:
+            - payment
+            # - setup
+            # - subscription
+            # - save_card
+          default: payment
+          example: payment
+        payment_details:
+          description: The `charge` object details associated with the Checkout Session after successful payment.
+          type: object
+          nullable: true
+          example: null
+        payment_method_types:
+          description: A list of the types of payment methods (e.g. card) this Checkout Session is allowed to accept.
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentMethodType'
+          example:
+            - card
+            - bpi
+            - gcash
+            - maya
+        payment_status:
+          - $ref: '#/components/schemas/PaymentStatusType'
+        payment_url:
+          description: The URL to the Checkout Session. Redirect customers to this URL to take them to Checkout.
+          type: string
+          example: https://new.pay.magpie.im/cs_NQrmHLLhioV34BUG
+        phone_number_collection:
+          description: Describes whether Checkout should collect the customer's phone number.
+          type: boolean
+          example: true
+        require_auth:
+          title: Require auth
+          description: Indicates whether 3D Secure authentication shall be required for card payments. Always have a value `true`.
+          type: boolean
+          example: true
+        shipping:
+          title: Shipping address
+          description: The customer's shipping address.
+          nullable: true
+          allOf:
+            - $ref: '#/components/schemas/AddressSerializer'
+        shipping_address_collection:
+          title: ShippingAddressCollection
+          allOf:
+            - $ref: '#/components/schemas/ShippingAddressCollection'
+        submit_type:
+          description: Describes the type of transaction being performed by Checkout in order to customize relevant text on the page, such as the submit button.
+          type: string
+          enum:
+            - pay
+            - book
+            - donate
+            - send
+          example: pay
+        success_url:
+          description: The URL the customer will be directed to after a successful payment.
+          type: string
+          example: https://example.com/success
+    ShippingAddressCollection:
+      title: ShippingAddressCollection
+      description: Describes whether Checkout should collect the customer's shipping address.
+      type: object
+      required:
+        - allowed_countries
+      properties:
+        allowed_countries:
+          title: Allowed countries
+          description: A list of two-letter ISO country codes. Checkout will only collect shipping address from customers in these countries.
+          type: array
+          items:
+            type: string
+          example:
+            - PH
+            - SG
+  securitySchemes:
+    HTTPBasic:
+      type: http
+      scheme: basic

@@ -1,0 +1,1567 @@
+openapi: 3.0.2
+info:
+  title: Magpie Payments API Documentation
+  description:
+    "\n## Usage\n\nThe shortest path to accepting payments is to create\
+    \ a source and use that source to create a charge.\n\n### 1. Create a Source\n\
+    \n#### Source Request\n\n```json\n{\n    \"currency\": \"php\",\n    \"type\"\
+    : \"gcash\",\n    \"redirect\": {\n        \"success\": \"https://google.com?status=success\"\
+    ,\n        \"fail\": \"https://google.com?status=fail\"\n    }\n}\n```\n\n####\
+    \ Source Response\n\n```json\n{\n    \"object\": \"source\",\n    \"id\": \"src_017b24c08a007edc6433ceb2ea123c34\"\
+    ,\n    \"type\": \"gcash\",\n    \"card\": null,\n    \"redirect\": {\n      \
+    \  \"success\": \"https://google.com?status=success\",\n        \"fail\": \"https://google.com?status=fail\"\
+    \n    },\n    \"vaulted\": false,\n    \"used\": false,\n    \"livemode\": false,\n\
+    \    \"created_at\": \"2021-08-08T15:53:23.227251+08:00\"\n}\n```\n\n### 2. Create\
+    \ a Charge\n\n#### Charge Request\n\n```json\n{\n    \"amount\": 5000,\n    \"\
+    currency\": \"php\",\n    \"source\": \"src_017b24c08a007edc6433ceb2ea123c34\"\
+    ,\n    \"description\": \"Board Rental\",\n    \"statement_descriptor\": \"Surf\
+    \ Shack\",\n    \"capture\": true\n}\n```\n\n#### Charge Response\n\n```json\n\
+    {\n    \"object\": \"charge\",\n    \"id\": \"ch_017b24c343a2c0e797a7a39bcb183f5d\"\
+    ,\n    \"amount\": 5000,\n    \"amount_refunded\": 0,\n    \"captured\": false,\n\
+    \    \"currency\": \"php\",\n    \"statement_descriptor\": \"Surf Shack\",\n \
+    \   \"description\": \"Board Rental\",\n    \"source\": {\n        \"object\"\
+    : \"source\",\n        \"id\": \"src_017b24c08a007edc6433ceb2ea123c34\",\n   \
+    \     \"type\": \"gcash\",\n        \"card\": null,\n        \"redirect\": {\n\
+    \            \"success\": \"https://google.com?status=success\",\n           \
+    \ \"fail\": \"https://google.com?status=fail\"\n        },\n        \"vaulted\"\
+    : false,\n        \"used\": true,\n        \"livemode\": false,\n        \"created_at\"\
+    : \"2021-08-08T15:53:23.227251+08:00\"\n    },\n    \"action\": {\n        \"\
+    url\": \"https://payments.gcash.com/xxxxx/\",\n        \"type\": \"redirect_to_url\"\
+    \n    },\n    \"refunds\": [],\n    \"status\": \"pending\",\n    \"livemode\"\
+    : false,\n    \"created_at\": \"2021-08-08T15:56:21.827531+08:00\",\n    \"updated_at\"\
+    : \"2021-08-08T15:56:21.827531+08:00\"\n}\n```\n\nRedirect your users to the `action.url`\
+    \ page for authentication. Whatever the outcome will be,\nit will redirect back\
+    \ to the `success` or `fail` URLs you defined during source creation.\nYou may\
+    \ execute some custom flow at this point.\n"
+  version: 2.0.0
+  contact:
+    name: Magpie Support
+    email: support@magpie.im
+paths:
+  /v2/sources/:
+    post:
+      tags:
+        - Sources
+      summary: Create Source
+      description: 'Creates a single use source that wraps the details of a credit card, wallet or bank account. These sources can only be used once: by creating a new charge object, or attaching them to a customer.'
+      operationId: Create_Source_v2_sources__post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSourceSerializer'
+            examples:
+              gcash:
+                summary: GCash payment method
+                description: Use this payload when you want to collect payment through GCash
+                value:
+                  type: gcash
+                  redirect:
+                    success: https://yoursite.com/?status=success
+                    fail: https://yoursite.com/?status=fail
+                    notify: https://yoursite.com/notifications
+              maya:
+                summary: Maya payment method
+                description: Use this payload when you want to collect payment through Maya
+                value:
+                  type: paymaya
+                  redirect:
+                    success: https://yoursite.com/?status=success
+                    fail: https://yoursite.com/?status=fail
+                    notify: https://yoursite.com/notifications
+              wechat:
+                summary: Wechat payment method
+                description:
+                  Use this payload when you want to collect payment through
+                  WeChat Pay
+                value:
+                  type: wechat
+                  redirect:
+                    success: https://yoursite.com/?status=success
+                    fail: https://yoursite.com/?status=fail
+                    notify: https://yoursite.com/notifications
+              card:
+                summary: Maya payment method
+                description: Use this payload when you want to collect payment through Maya
+                value:
+                  type: card
+                  card:
+                    name: Gerry Isaac
+                    number: '4012001037141112'
+                    exp_month: '12'
+                    exp_year: '2025'
+                    cvc: '123'
+                    address_line1: string
+                    address_line2: string
+                    address_city: string
+                    address_state: string
+                    address_country: string
+                    address_zip: string
+                  redirect:
+                    success: https://yoursite.com/?status=success
+                    fail: https://yoursite.com/?status=fail
+                    notify: https://yoursite.com/notifications
+                  owner:
+                    billing:
+                      name: Gerry Isaac
+                      phone_number: '639175511222'
+                      email: client@example.com
+                      line1: '#123 JP Rizal St.'
+                      line2: Brgy. Aguinaldo
+                      city: Quezon City
+                      state: Metro Manila
+                      country: PH
+                      zip_code: '1100'
+                    shipping:
+                      name: Gerry Isaac
+                      phone_number: '639175511222'
+                      email: client@example.com
+                      line1: '#123 JP Rizal St.'
+                      line2: Brgy. Aguinaldo
+                      city: Quezon City
+                      state: Metro Manila
+                      country: PH
+                      zip_code: '1100'
+                    name: Gerry Isaac
+                    address_country: PH
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadSourceSerializer'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - HTTPBasic: []
+  /v2/sources/{src_id}:
+    get:
+      tags:
+        - Sources
+      summary: Retrieve Source
+      description: 'Retrieves an existing source object. Supply the unique source ID from a source creation request and will return the corresponding source object information.'
+      operationId: Retrieve_Source_v2_sources__src_id__get
+      parameters:
+        - required: true
+          schema:
+            title: Src Id
+            type: string
+          name: src_id
+          in: path
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadSourceSerializer'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - HTTPBasic: []
+  /v2/charges/:
+    get:
+      tags:
+        - Charges
+      summary: List Charges
+      description: Retrieves a list of charges
+      operationId: List_Charges_v2_charges__get
+      parameters:
+        - description: A cursor for use in pagination. `start_after` is an object ID that defines your place in the list.
+          required: false
+          schema:
+            title: Start After
+            type: string
+            description: A cursor for use in pagination. `start_after` is an object ID that defines your place in the list.
+            default: ''
+          name: start_after
+          in: query
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListChargeSerializer'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - HTTPBasic: []
+    post:
+      tags:
+        - Charges
+      summary: Create Charge
+      description: 'To charge a credit or debit card, wallet or bank account, you create a Charge object. You can retrieve and refund individual charges as well as list all charges. Charges are identified by a unique, random ID.'
+      operationId: Create_Charge_v2_charges__post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateChargeSerializer'
+        required: true
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadChargeSerializer'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - HTTPBasic: []
+  /v2/charges/{ch_id}:
+    get:
+      tags:
+        - Charges
+      summary: Retrieve Charge
+      description: 'Retrieves the details of a charge that has previously been created. Supply the unique charge ID that was returned from your previous request, and Magpie will return the corresponding charge information. The same information is returned when creating or refunding the charge.'
+      operationId: Retrieve_Charge_v2_charges__ch_id__get
+      parameters:
+        - required: true
+          schema:
+            title: Ch Id
+            type: string
+          name: ch_id
+          in: path
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadChargeSerializer'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - HTTPBasic: []
+  /v2/charges/{ch_id}/capture:
+    post:
+      tags:
+        - Charges
+      summary: Capture Charge
+      description: 'Capture the payment of an existing, uncaptured, charge. This is the second half of the two-step payment flow, where first you created a charge with the capture option set to false.'
+      operationId: Capture_Charge_v2_charges__ch_id__capture_post
+      parameters:
+        - required: true
+          schema:
+            title: Ch Id
+            type: string
+          name: ch_id
+          in: path
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCaptureSerializer'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadChargeSerializer'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - HTTPBasic: []
+  /v2/charges/{ch_id}/void:
+    post:
+      tags:
+        - Charges
+      summary: Void Charge
+      description: 'Cancel an authorized transaction. Can also be used to cancel a captured/purchased transaction that has not yet settled at the merchant account.'
+      operationId: Void_Charge_v2_charges__ch_id__void_post
+      parameters:
+        - required: true
+          schema:
+            title: Ch Id
+            type: string
+          name: ch_id
+          in: path
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadChargeSerializer'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - HTTPBasic: []
+  /v2/charges/{ch_id}/refund:
+    post:
+      tags:
+        - Charges
+      summary: Refund Charge
+      description: Refund a specific charge.
+      operationId: Refund_Charge_v2_charges__ch_id__refund_post
+      parameters:
+        - required: true
+          schema:
+            title: Ch Id
+            type: string
+          name: ch_id
+          in: path
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateRefundSerializer'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadChargeSerializer'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - HTTPBasic: []
+  /v2/charges/{ch_id}/verify:
+    post:
+      tags:
+        - Charges
+      summary: Verify Charge
+      operationId: Verify_charge_v2_charges__ch_id__verify_post
+      parameters:
+        - required: true
+          schema:
+            title: Ch Id
+            type: string
+          name: ch_id
+          in: path
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/VerifyChargeSerializer'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadChargeSerializer'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - HTTPBasic: []
+  /v2/customers/:
+    post:
+      tags:
+        - Customers
+      summary: Create Customer
+      description: Creates a customer
+      operationId: Create_Customer_v2_customers__post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCustomerSerializer'
+        required: true
+      responses:
+        '201':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadCustomerSerializer'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - HTTPBasic: []
+  /v2/customers/{cus_id}:
+    get:
+      tags:
+        - Customers
+      summary: Retrieve Customer
+      description: Retrieves the details of an existing customer. You need only supply the unique customer identifier that was returned upon customer creation.
+      operationId: Retrieve_Customer_v2_customers__cus_id__get
+      parameters:
+        - required: true
+          schema:
+            title: Cus Id
+            type: string
+          name: cus_id
+          in: path
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadCustomerSerializer'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - HTTPBasic: []
+    put:
+      tags:
+        - Customers
+      summary: Update Customer
+      description: Update customer details
+      operationId: Update_Customer_v2_customers__cus_id__put
+      parameters:
+        - required: true
+          schema:
+            title: Cus Id
+            type: string
+          name: cus_id
+          in: path
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCustomerSerializer'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadCustomerSerializer'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - HTTPBasic: []
+  /v2/customers/by_email/{email}:
+    get:
+      tags:
+        - Customers
+      summary: Retrieve Customer By Email
+      description: Retrieves the details of an existing customer using email. You need only supply the unique email identifier that was used upon customer creation.
+      operationId: Retrieve_Customer_by_Email_v2_customers_by_email__email__get
+      parameters:
+        - required: true
+          schema:
+            title: Email
+            type: string
+          name: email
+          in: path
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadCustomerSerializer'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - HTTPBasic: []
+  /v2/customers/{cus_id}/sources:
+    post:
+      tags:
+        - Customers
+      summary: Attach Source
+      description: Attach a source to a customer typically used for recurring charges without your customer's needing to complete the payment process again.
+      operationId: Attach_Source_v2_customers__cus_id__sources_post
+      parameters:
+        - required: true
+          schema:
+            title: Cus Id
+            type: string
+          name: cus_id
+          in: path
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AttachSourceSerializer'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadCustomerSerializer'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - HTTPBasic: []
+  /v2/customers/{cus_id}/sources/{src_id}:
+    delete:
+      tags:
+        - Customers
+      summary: Detach Source
+      description: Detach a source from a customer.
+      operationId: Detach_Source_v2_customers__cus_id__sources__src_id__delete
+      parameters:
+        - required: true
+          schema:
+            title: Cus Id
+            type: string
+          name: cus_id
+          in: path
+        - required: true
+          schema:
+            title: Src Id
+            type: string
+          name: src_id
+          in: path
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadCustomerSerializer'
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - HTTPBasic: []
+components:
+  schemas:
+    AddressSerializer:
+      title: AddressSerializer
+      required:
+        - name
+      type: object
+      properties:
+        name:
+          title: Name
+          maxLength: 50
+          minLength: 1
+          pattern: ^[A-Za-z0-9\s\'#_\.\-,]+$
+          type: string
+          description: Full name of account holder
+          example: Gerry Isaac
+        phone_number:
+          title: Phone Number
+          maxLength: 50
+          minLength: 1
+          pattern: ^[A-Za-z0-9\s\'#_\.\-,]+$
+          type: string
+          example: '639175511222'
+        email:
+          title: Email Address
+          type: string
+          format: email
+          example: client@example.com
+        line1:
+          title: Line 1
+          maxLength: 255
+          minLength: 1
+          pattern: ^[A-Za-z0-9\s\'#_\.\-,]+$
+          type: string
+          example: '#123 JP Rizal St.'
+        line2:
+          title: Line 2
+          maxLength: 255
+          minLength: 1
+          pattern: ^[A-Za-z0-9\s\'#_\.\-,]+$
+          type: string
+          example: Brgy. Aguinaldo
+        city:
+          title: City
+          maxLength: 100
+          minLength: 1
+          pattern: ^[A-Za-z0-9\s\'#_\.\-,]+$
+          type: string
+          example: Quezon City
+        state:
+          title: State
+          maxLength: 50
+          minLength: 1
+          pattern: ^[A-Za-z0-9\s\'#_\.\-,]+$
+          type: string
+          example: Metro Manila
+        country:
+          title: Country
+          maxLength: 50
+          minLength: 1
+          pattern: ^[A-Za-z0-9\s\'#_\.\-,]+$
+          type: string
+          example: PH
+        zip_code:
+          title: Magpie Code
+          maxLength: 50
+          minLength: 1
+          pattern: ^[A-Za-z0-9\s\'#_\.\-,]+$
+          type: string
+          example: '1100'
+    AttachSourceSerializer:
+      title: AttachSourceSerializer
+      required:
+        - source
+      type: object
+      properties:
+        source:
+          title: Source
+          maxLength: 255
+          minLength: 5
+          type: string
+          description: The source ID you want to attach to a customer.
+          example: src_017957321fc976151ca9934f3f5a7732
+    CreateCaptureSerializer:
+      title: CreateCaptureSerializer
+      required:
+        - amount
+      type: object
+      properties:
+        amount:
+          title: Amount
+          type: integer
+          description:
+            The amount to capture, must be equal or less than the authorized
+            amount. A positive integer in the smallest currency unit, e.g. cents.
+            For example, an amount of PHP18.89 would be entered as the integer 1889.
+          example: 5000
+    CreateCardSerializer:
+      title: CreateCardSerializer
+      required:
+        - name
+        - number
+        - exp_month
+        - exp_year
+        - cvc
+      type: object
+      properties:
+        name:
+          title: Name
+          maxLength: 50
+          minLength: 1
+          pattern: ^[A-Za-z0-9\s\'#_\.\-,]+$
+          type: string
+          description: Full name of cardholder
+          example: Gerry Isaac
+        number:
+          title: Card Number
+          type: string
+          description: The 16-digit card number
+          example: '4012001037141112'
+        exp_month:
+          title: Expiry month
+          maxLength: 2
+          minLength: 1
+          type: string
+          description: Expiration month of the card.
+          example: '12'
+        exp_year:
+          title: Expiry year
+          maxLength: 4
+          minLength: 4
+          type: string
+          description: Four-digit number expiration year of the card.
+          example: '2025'
+        cvc:
+          title: CVC
+          maxLength: 4
+          minLength: 3
+          type: string
+          description: "The card\u2019s security code."
+          example: '123'
+        address_line1:
+          title: Address Line1
+          maxLength: 255
+          minLength: 1
+          pattern: ^[A-Za-z0-9\s\'#_\.\-,]+$
+          type: string
+        address_line2:
+          title: Address Line2
+          maxLength: 255
+          minLength: 1
+          pattern: ^[A-Za-z0-9\s\'#_\.\-,]+$
+          type: string
+        address_city:
+          title: Address City
+          maxLength: 255
+          minLength: 1
+          pattern: ^[A-Za-z0-9\s\'#_\.\-,]+$
+          type: string
+        address_state:
+          title: Address State
+          maxLength: 255
+          minLength: 1
+          pattern: ^[A-Za-z0-9\s\'#_\.\-,]+$
+          type: string
+        address_country:
+          title: Address Country
+          maxLength: 255
+          minLength: 1
+          pattern: ^[A-Za-z0-9\s\'#_\.\-,]+$
+          type: string
+        address_zip:
+          title: Address Magpie
+          maxLength: 50
+          minLength: 1
+          pattern: ^[A-Za-z0-9\s\'#_\.\-,]+$
+          type: string
+    CreateChargeSerializer:
+      title: CreateChargeSerializer
+      required:
+        - amount
+        - currency
+        - source
+        - description
+        - statement_descriptor
+        - capture
+      type: object
+      properties:
+        amount:
+          title: Amount
+          type: integer
+          description:
+            A positive integer in the smallest currency unit, e.g. cents.
+            For example, an amount of PHP18.89 would be entered as the integer 1889.
+          example: 5000
+        currency:
+          title: Currency
+          maxLength: 4
+          minLength: 2
+          pattern: ^[A-Za-z0-9\s\'#_\.\-,]+$
+          type: string
+          description:
+            3-letter ISO-code for currency. If not provided, defaults to
+            PHP.
+          example: PHP
+        source:
+          title: Source
+          maxLength: 255
+          minLength: 1
+          pattern: ^[A-Za-z0-9\s\'#_\.\-,]+$
+          type: string
+          description: 'The ID of the payment source. '
+          example: src_0178c4a692d2384e33c29f5f10933be1
+        description:
+          title: Description
+          maxLength: 255
+          minLength: 1
+          type: string
+          description: An arbitrary string which you can attach to a charge object.
+          example: 1 hour surf lesson
+        statement_descriptor:
+          title: Statement Descriptor
+          maxLength: 100
+          minLength: 3
+          pattern: ^[A-Za-z0-9\s\'#_\.\-,]+$
+          type: string
+          description:
+            "An arbitrary string to be displayed on your customer\u2019\
+            s credit card statement. Maximum 15 characters. If not provided, defaults\
+            \ to Magpie.IM Pte Ltd."
+          example: Surf Rack
+        capture:
+          title: Capture
+          type: boolean
+          description:
+            Whether or not to immediately capture the charge. When false,
+            the charge needs to be captured later. Defaults to true.
+          example: true
+        cvc:
+          title: CVC
+          maxLength: 4
+          minLength: 3
+          type: string
+          description: The card's security code
+          example: '123'
+        require_auth:
+          title: Require Payer Authentication
+          type: boolean
+          description:
+            When set to false, attempt to do 3D secure authentication for
+            credit card is bypassed and charge is immediately executed. This has no
+            effect for vaulted cards.
+          default: true
+          example: false
+        redirect_url:
+          title: Redirect url
+          maxLength: 2083
+          minLength: 1
+          type: string
+          description: Used for direct bank transactions
+          format: uri
+          example: https://mywebsite.com/callback
+        metadata:
+          title: Metadata
+          type: object
+          description: Any data you want to attach to this
+          example: '{}'
+    CreateCustomerSerializer:
+      title: CreateCustomerSerializer
+      required:
+        - email
+        - description
+      type: object
+      properties:
+        email:
+          title: Email
+          type: string
+          description: Customer's email
+          format: email
+          example: juandelacruz@pinoymail.com
+        mobile_number:
+          title: Mobile Number
+          maxLength: 25
+          minLength: 5
+          type: string
+          description: Customer's mobile number
+          default: ''
+          example: '+639171234567'
+        description:
+          title: Description
+          maxLength: 255
+          minLength: 1
+          type: string
+          description: Customer description.
+          example: Juan dela Cruz (created by PayTerminal)
+        metadata:
+          title: Metadata
+          type: object
+          description:
+            Set of key-value pairs that you can attach to an object. This
+            can be useful for storing additional information about the object in a
+            structured format.
+          default: {}
+          example:
+            address: '#123 JP Rizal St., Quezon City'
+    CreateRefundSerializer:
+      title: CreateRefundSerializer
+      type: object
+      properties:
+        amount:
+          title: Amount
+          type: integer
+          description:
+            The amount to refund, must be equal or less than the charge
+            amount. A positive integer in the smallest currency unit, e.g. cents.
+            For example, an amount of PHP18.89 would be entered as the integer 1889.
+          example: 5000
+    CreateSourceSerializer:
+      title: CreateSourceSerializer
+      required:
+        - type
+      type: object
+      properties:
+        type:
+          title: Source Type
+          allOf:
+            - $ref: '#/components/schemas/SourceType'
+          description: The type of the source to create.
+          example: card
+        card:
+          title: Card Details
+          allOf:
+            - $ref: '#/components/schemas/CreateCardSerializer'
+          description:
+            "**Optional**. If source type is `card`, this is a required
+            field that contains user's card details"
+        redirect:
+          title: Redirect URLs
+          allOf:
+            - $ref: '#/components/schemas/RedirectSerializer'
+        owner:
+          title: Account holder details
+          allOf:
+            - $ref: '#/components/schemas/OwnerSerializer'
+    HTTPValidationError:
+      title: HTTPValidationError
+      type: object
+      properties:
+        detail:
+          title: Detail
+          type: array
+          items:
+            $ref: '#/components/schemas/ValidationError'
+    ListChargeSerializer:
+      title: ListChargeSerializer
+      required:
+        - object
+        - data
+      type: object
+      properties:
+        object:
+          title: Object
+          type: string
+          description:
+            String representing the object's type. Objects of the same
+            type share the same value.
+          example: list
+        next:
+          title: Next Page
+          type: string
+          description:
+            String representing the object's type. Objects of the same
+            type share the same value.
+          example: /v2/charges/?start_after=ch_0179ee1e0b12cb6430a04ee7ae103ee6
+        data:
+          title: Data
+          type: array
+          items:
+            $ref: '#/components/schemas/ReadChargeSerializer'
+          description: List of charge objects
+    OwnerSerializer:
+      title: OwnerSerializer
+      type: object
+      properties:
+        billing:
+          title: Billing Address
+          allOf:
+            - $ref: '#/components/schemas/AddressSerializer'
+        shipping:
+          title: Shipping Address
+          allOf:
+            - $ref: '#/components/schemas/AddressSerializer'
+        name:
+          title: Name
+          maxLength: 50
+          type: string
+          description: Full name of account holder
+          example: Gerry Isaac
+        address_country:
+          title: Country
+          maxLength: 50
+          minLength: 1
+          pattern: ^[A-Za-z0-9\s\'#_\.\-,]+$
+          type: string
+          example: PH
+    ReadBankAccountSerializer:
+      title: ReadBankAccountSerializer
+      required:
+        - reference_id
+        - bank_type
+        - bank_code
+        - account_name
+        - account_number
+        - account_type
+        - expires_at
+      type: object
+      properties:
+        reference_id:
+          title: Reference Id
+          type: string
+          description: Reference Id we used in connecting to debit api
+          example: cus_123123123
+        bank_type:
+          title: Bank Type
+          type: string
+          description: Token's bank type
+          example: BPI
+        bank_code:
+          title: Bank Code
+          type: string
+          description: Specific bank's code
+          example: magpiebpi
+        account_name:
+          title: Account name
+          type: string
+          example: ''
+        account_number:
+          title: Account number
+          type: string
+          example: ''
+        account_type:
+          title: Account type
+          type: string
+          example: ''
+        expires_at:
+          title: Expiration date
+          type: string
+          example: ''
+        metadata:
+          title: Metadata
+          type: object
+          example: {}
+    ReadCardSerializer:
+      title: ReadCardSerializer
+      required:
+        - object
+        - id
+        - name
+        - last4
+        - exp_month
+        - exp_year
+        - brand
+        - country
+        - cvc_checked
+        - funding
+        - issuing_bank
+      type: object
+      properties:
+        object:
+          title: Object
+          type: string
+          description:
+            String representing the object's type. Objects of the same
+            type share the same value.
+          example: source
+        id:
+          title: ID
+          type: string
+          description:
+            A unique ID for this card, usually starts with `card_`, followed
+            by an alphanumeric string.
+          example: card_01786e96b17d197aacd0de4e1f01ac5f
+        name:
+          title: Name
+          type: string
+          description: Full name of cardholder
+          example: Gerry Isaac
+        last4:
+          title: Card Number
+          type: string
+          description: The last 4 digits of the credit card number
+          example: '1112'
+        exp_month:
+          title: Expiry month
+          type: string
+          description: Expiration month of the card.
+          example: '12'
+        exp_year:
+          title: Expiry year
+          type: string
+          description: Four-digit number expiration year of the card.
+          example: '2025'
+        address_line1:
+          title: Address Line1
+          type: string
+        address_line2:
+          title: Address Line2
+          type: string
+        address_city:
+          title: Address City
+          type: string
+        address_state:
+          title: Address State
+          type: string
+        address_country:
+          title: Address Country
+          type: string
+        address_zip:
+          title: Address Magpie
+          type: string
+        brand:
+          title: Brand
+          type: string
+        country:
+          title: Country
+          type: string
+        cvc_checked:
+          title: Cvc Checked
+          type: string
+        funding:
+          title: Funding
+          type: string
+        issuing_bank:
+          title: Issuing Bank
+          type: string
+    ReadChargeSerializer:
+      title: ReadChargeSerializer
+      required:
+        - object
+        - id
+        - amount
+        - amount_refunded
+        - authorized
+        - captured
+        - currency
+        - statement_descriptor
+        - description
+        - source
+        - refunds
+        - status
+        - livemode
+        - created_at
+        - updated_at
+      type: object
+      properties:
+        object:
+          title: Object
+          type: string
+          description: The type of object, in this case charge
+          example: charge
+        id:
+          title: ID
+          type: string
+          description: A unique ID for this charge. usually starts with 'ch_', followed by an alphanumeric string.
+          example: ch_0179504c16bddfe6bb8444581af5ae05
+        amount:
+          title: Amount
+          type: integer
+          description: The amount of the charge
+          example: 5000
+        amount_refunded:
+          title: Amount Refunded
+          type: integer
+          description: The amount refunded
+          example: 0
+        authorized:
+          title: Authorized
+          type: boolean
+          description: Whether an amount is authorized / held for future capturing.
+          example: false
+        captured:
+          title: Captured
+          type: boolean
+          description: Whether an authorized amount has been captured or not
+          example: true
+        currency:
+          title: Currency
+          type: string
+          description: 3-letter ISO-code for currency.
+          example: PHP
+        statement_descriptor:
+          title: Statement Descriptor
+          type: string
+          description:
+            The statement descriptor that will appear in the credit card
+            statement
+          example: Surf Rack
+        description:
+          title: Description
+          type: string
+          description: The description for this charge
+          example: 1 hour surf lesson
+        source:
+          title: Source
+          allOf:
+            - $ref: '#/components/schemas/ReadSourceSerializer'
+          description: Source used to execute the charge.
+        require_auth:
+          title: Require Payer Authentication
+          type: boolean
+          description:
+            When set to false, attempt to do 3D secure authentication for
+            credit card is bypassed and charge is immediately executed. This has no
+            effect for vaulted cards.
+          default: true
+          example: false
+        owner:
+          title: Owner
+          type: object
+          description: Payment source owner details
+          example:
+            name: John Doe
+            address_country: PH
+        action:
+          title: Next Action
+          type: object
+          description: Tells the next action the client needs to make. Generally used for credit card, bank or wallet authentication.
+          example:
+            type: redirect_to_url
+            url: https://api.magpie.im/v2/charges/auth/ra_0179082b7bf0afce5b5f7e445907198d/
+        refunds:
+          title: Refunds
+          type: array
+          items:
+            $ref: '#/components/schemas/ReadRefundSerializer'
+          description: A list of refunds, if applicable
+        status:
+          title: Status
+          type: string
+          description: The status of the charge
+          example: succeeded
+        livemode:
+          title: Live Mode
+          type: boolean
+          description:
+            Will be true if the secret key used was the live key, false
+            if the test key was used
+          example: true
+        created_at:
+          title: Created Date
+          type: string
+          description: Time at which the object was created in ISO 8601 format.
+          example: '2021-04-12T13:55:54.194136+08:00'
+        updated_at:
+          title: Updated Date
+          type: string
+          description: Latest time at which the object was updated in ISO 8601 format.
+          example: '2021-04-13T13:55:54.194136+08:00'
+        metadata:
+          title: Metadata
+          type: object
+          example: {}
+        failure_data:
+          title: Failure Data
+          type: object
+          description: A dictionary that contains error response from the provider.
+          example:
+            code: authentication_required
+            reason: The card was declined as the transaction requires authentication.
+            next_steps:
+              The customer should try again and authenticate their card
+              when prompted during the transaction.
+            provider_response: {}
+    ReadCustomerSerializer:
+      title: ReadCustomerSerializer
+      required:
+        - sources
+        - livemode
+      type: object
+      properties:
+        object:
+          title: Object
+          type: string
+          description: The type of object, in this case charge
+          example: charge
+        id:
+          title: ID
+          type: string
+          description:
+            A unique ID for this charge. usually starts with `cus_`, followed
+            by an alphanumeric string.
+          example: cus_01786de4d9d69ad1369bfd56b098ccd9
+        email:
+          title: Email
+          type: string
+          description: Customer's email
+          example: juandelacruz@pinoymail.com
+        mobile_number:
+          title: Mobile Number
+          type: string
+          description: Customer's mobile number
+          example: '+639171234567'
+        description:
+          title: Description
+          type: string
+          description: Customer description.
+          example: Juan dela Cruz (created by PayTerminal)
+        sources:
+          title: Sources
+          type: array
+          items:
+            $ref: '#/components/schemas/ReadSourceSerializer'
+          description: "The customer\u2019s payment sources, if any."
+        livemode:
+          title: Live Mode
+          type: boolean
+          description:
+            Will be true if the secret key used was the live key, false
+            if the test key was used
+          example: true
+        created_at:
+          title: Created Date
+          type: string
+          description: Time at which the object was created in ISO 8601 format.
+          example: '2021-04-12T13:55:54.194136+08:00'
+        updated_at:
+          title: Updated Date
+          type: string
+          description: Time at which the object was updated in ISO 8601 format.
+          example: '2021-04-12T13:55:55.194136+08:00'
+        metadata:
+          title: Metadata
+          type: object
+          description: Set of key-value pairs that you can attach to an object. This can be useful for storing additional information about the object in a structured format.
+          default: {}
+          example:
+            address: '#123 JP Rizal St., Quezon City'
+    ReadRefundSerializer:
+      title: ReadRefundSerializer
+      required:
+        - object
+        - id
+        - amount
+        - currency
+        - reason
+        - status
+        - created_at
+      type: object
+      properties:
+        object:
+          title: Object
+          type: string
+          description: The type of object, in this case refund
+          example: refund
+        id:
+          title: ID
+          type: string
+          description: A unique ID for this refund. usually starts with 're_', followed by an alphanumeric string.
+          example: re_0179ee1e0b12cb6430a04ee7ae103ee6
+        amount:
+          title: Amount
+          type: integer
+          description: The amount of the charge
+          example: 5000
+        currency:
+          title: Currency
+          type: string
+          description: 3-letter ISO-code for currency.
+          example: PHP
+        reason:
+          title: Reason
+          type: string
+          description: Reason for the refund
+          example: Refund
+        status:
+          title: Status
+          type: string
+          description: The status of the refund
+          example: succeeded
+        created_at:
+          title: Created Date
+          type: string
+          description: Time at which the object was created in ISO 8601 format.
+          example: '2021-04-12T13:55:54.194136+08:00'
+        updated_at:
+          title: Updated Date
+          type: string
+          description: Time at which the object was updated in ISO 8601 format.
+          example: '2021-04-12T13:55:54.194136+08:00'
+    ReadSourceSerializer:
+      title: ReadSourceSerializer
+      required:
+        - object
+        - id
+        - type
+        - vaulted
+        - used
+        - livemode
+        - created_at
+        - updated_at
+      type: object
+      properties:
+        object:
+          title: Object
+          type: string
+          description: String representing the object's type. Objects of the same type share the same value.
+          example: source
+        id:
+          title: ID
+          type: string
+          description: A unique ID for this source, usually starts with `src_`, followed by an alphanumeric string.
+          example: src_01786de4d9d69ad1369bfd56b098ccd9
+        type:
+          title: Source Type
+          allOf:
+            - $ref: '#/components/schemas/SourceType'
+          description: The type of the source to create.
+          example: card
+        card:
+          title: Card Details
+          allOf:
+            - $ref: '#/components/schemas/ReadCardSerializer'
+          description: Card details of tokenized credit card.
+        bank_account:
+          title: Bank Account Details
+          allOf:
+            - $ref: '#/components/schemas/ReadBankAccountSerializer'
+          description: Bank details of the tokenized account.
+        redirect:
+          title: Redirect
+          allOf:
+            - $ref: '#/components/schemas/RedirectSerializer'
+          description: Information related to the redirect flow. Present if the source is authenticated by a redirect
+        owner:
+          title: Account holder details
+          allOf:
+            - $ref: '#/components/schemas/OwnerSerializer'
+        vaulted:
+          title: Vaulted
+          type: boolean
+          description: Whether this source has been securely saved for later reuse.
+          example: false
+        used:
+          title: Used
+          type: boolean
+          description: Whether this source has already been used.
+          example: false
+        livemode:
+          title: Live Mode
+          type: boolean
+          description: Has the value true if the object exists in live mode or the value false if the object exists in test mode.
+          example: true
+        created_at:
+          title: Created Date
+          type: string
+          description: Time at which the object was created in ISO 8601 format.
+          example: '2021-03-26T17:36:57.828847+08:00'
+        updated_at:
+          title: Updated Date
+          type: string
+          description: Time at which the object was updated in ISO 8601 format.
+          example: '2021-03-26T17:36:57.828847+08:00'
+        metadata:
+          title: Metadata
+          type: object
+          example: {}
+    RedirectSerializer:
+      title: RedirectSerializer
+      required:
+        - success
+        - fail
+      type: object
+      properties:
+        success:
+          title: Success URL
+          maxLength: 2083
+          minLength: 1
+          type: string
+          description: The URL where we redirect after successful payment.
+          format: uri
+          example: https://magpie.im/?status=success
+        fail:
+          title: Failure URL
+          maxLength: 2083
+          minLength: 1
+          type: string
+          description: The URL where we redirect after failed payment.
+          format: uri
+          example: https://magpie.im/?status=failed
+        notify:
+          title: Notification URL
+          maxLength: 2083
+          minLength: 1
+          type: string
+          description: The URL where we will call repeatedly, until a proper response was received.
+          format: uri
+          example: https://magpie.im/?status=notification
+    SourceType:
+      title: SourceType
+      enum:
+        - card
+        - gcash
+        - paymaya
+        - wechat
+        - alipay
+        - unionpay
+        - grabpay
+        - instapay
+        - qrph
+      type: string
+      description: An enumeration.
+    UpdateCustomerSerializer:
+      title: UpdateCustomerSerializer
+      type: object
+      properties:
+        mobile_number:
+          title: Mobile Number
+          maxLength: 25
+          minLength: 5
+          type: string
+          description: Customer's mobile number
+          example: '+639171234567'
+        description:
+          title: Description
+          maxLength: 255
+          minLength: 1
+          type: string
+          description: Customer description.
+          example: Juan dela Cruz (created by PayTerminal)
+        metadata:
+          title: Metadata
+          type: object
+          description: Set of key-value pairs that you can attach to an object. This can be useful for storing additional information about the object in a structured format.
+          example:
+            address: '#123 JP Rizal St., Quezon City'
+    ValidationError:
+      title: ValidationError
+      required:
+        - loc
+        - msg
+        - type
+      type: object
+      properties:
+        loc:
+          title: Location
+          type: array
+          items:
+            anyOf:
+              - type: string
+              - type: integer
+        msg:
+          title: Message
+          type: string
+        type:
+          title: Error Type
+          type: string
+    VerifyChargeSerializer:
+      title: VerifyChargeSerializer
+      required:
+        - confirmation_id
+        - otp
+      type: object
+      properties:
+        confirmation_id:
+          title: Confirmation Id
+          maxLength: 255
+          minLength: 5
+          pattern: ^[A-Za-z0-9\s\'#_\.\-,]+$
+          type: string
+          description: Confirmation Id data from the provider
+          example: '1235567890'
+        otp:
+          title: One time pin
+          maxLength: 10
+          minLength: 1
+          type: string
+          description: OTP from the provider
+          example: '123456'
+  securitySchemes:
+    HTTPBasic:
+      type: http
+      scheme: basic
+servers:
+  - url: https://api.magpie.im
+    description: Production

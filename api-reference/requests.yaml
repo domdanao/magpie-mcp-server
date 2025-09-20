@@ -1,0 +1,557 @@
+openapi: 3.0.2
+info:
+  title: Payment Requests API
+  version: 1.0.0
+servers:
+  - url: https://request.magpie.im/api
+    description: Production server for Magpie Payment Requests API
+paths:
+  /v1/requests:
+    post:
+      tags:
+        - Payment Requests
+      summary: Create a Payment Request
+      description: Creates an invoice for a customer to pay.
+      operationId: create-request
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateRequestSerializer'
+        required: true
+        example:
+          currency: PHP
+          customer: cus_017b996e4a6a9cea9562902021febc6b
+          delivery_methods:
+            - email
+            - sms
+          line_items:
+            - amount: 4999
+              description: Annual Fee
+              image: https://example.com/image.png
+              name: Magpie Elite Membership
+              quantity: 1
+          message: Thank you for your purchase!
+          metadata: { 'Member ID': '123456' }
+          payment_method_types:
+            - card
+            - gcash
+            - paymaya
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadRequestSerializer'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - HTTPBasic: []
+    get:
+      tags:
+        - Payment Requests
+      summary: List all Payment Requests
+      description: Returns a list of all Payment Requests.
+      operationId: list-requests
+      parameters:
+        - name: page
+          in: query
+          description: The page number to return.
+          required: false
+          schema:
+            type: integer
+            example: 2
+        - name: limit
+          in: query
+          description: The number of items to return per page.
+          required: false
+          schema:
+            type: integer
+            example: 10
+        - name: status
+          in: query
+          description: The status of the Payment Requests to return.
+          required: false
+          schema:
+            type: string
+            enum:
+              - open
+              - paid
+              - voided
+          example: paid
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListRequestsSerializer'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - HTTPBasic: []
+  /v1/requests/{id}:
+    get:
+      tags:
+        - Payment Requests
+      summary: Retrieve a Payment Request
+      description: Retrieves a Payment Request object
+      operationId: retrieve-request
+      parameters:
+        - name: id
+          in: path
+          description: The ID of the Payment Request to retrieve
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadRequestSerializer'
+        '404':
+          description: Request not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPNotFoundError'
+      security:
+        - HTTPBasic: []
+  /v1/requests/{id}/void:
+    post:
+      tags:
+        - Payment Requests
+      summary: Void a Payment Request
+      description: Mark a Payment Request as void. This cannot be undone.
+      operationId: void-request
+      parameters:
+        - name: id
+          in: path
+          description: The ID of the Payment Request to void
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reason:
+                  description: The reason for voiding the Payment Request
+                  type: string
+                  example: Customer requested to cancel the order.
+        required: true
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadRequestSerializer'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+        '404':
+          description: Request not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPNotFoundError'
+      security:
+        - HTTPBasic: []
+  /v1/requests/{id}/resend:
+    post:
+      tags:
+        - Payment Requests
+      summary: Resend a Payment Request
+      description: Resend a Payment Request to the customer.
+      operationId: resend-request
+      parameters:
+        - name: id
+          in: path
+          description: The ID of the Payment Request to resend
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadRequestSerializer'
+        '404':
+          description: Request not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPNotFoundError'
+      security:
+        - HTTPBasic: []
+components:
+  schemas:
+    BrandingType:
+      title: Branding
+      description: Details on branding elements to apply when rendering the Payment Request page.
+      type: object
+      properties:
+        icon:
+          description: A secure URL to an image icon
+          type: string
+          nullable: true
+          example: https://example.com/icon.png
+        logo:
+          description: A secure URL to an image logo
+          type: string
+          nullable: true
+          example: https://example.com/logo.png
+        use_logo:
+          description: Has the value of true if logo should be rendered in payment page or false if icon should be used.
+          type: boolean
+          example: true
+        primary_color:
+          description: A hex color code that will be used as background color of the Payment Request page
+          type: string
+          nullable: true
+          example: '#FFFFFF'
+        secondary_color:
+          description: A hex color code that will be used as background color of the submit or PAY button
+          type: string
+          nullable: true
+          example: '#4f99fe'
+    CreateRequestSerializer:
+      title: CreateRequestSerializer
+      required:
+        - currency
+        - customer
+        - delivery_methods
+        - line_items
+        - payment_method_types
+      properties:
+        branding:
+          allOf:
+            - $ref: '#/components/schemas/BrandingType'
+        currency:
+          description: Three-letter [ISO currency code](https://www.iso.org/iso-4217-currency-codes.html), in lowercase. Must be a supported currency.
+          type: string
+          example: PHP
+        customer:
+          description: The ID of the customer who will receive the Payment Request.
+          type: string
+          example: cus_017b996e4a6a9cea9562902021febc6b
+        delivery_methods:
+          description: The methods by which the customer will receive the Payment Request.
+          type: array
+          items:
+            type: string
+            enum:
+              - email
+              - sms
+          example:
+            - email
+            - sms
+        line_items:
+          title: LineItem[]
+          description: A list of items the customer will be billed for.
+          type: array
+          items:
+            $ref: '#/components/schemas/LineItemSerializer'
+        message:
+          description: A custom message to be included in the Payment Request.
+          type: string
+          nullable: true
+          example: Thank you for your purchase!
+        metadata:
+          description: A set of key-value pairs that you can attach to the Payment Request. It can be useful for storing additional information about the invoice in a structured format.
+          type: object
+          additionalProperties:
+            type: string
+          example: { 'Member ID': '123456' }
+        payment_method_types:
+          title: PaymentMethod[]
+          description: The payment methods that are available for the customer to pay the Payment Request.
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentMethodType'
+          example:
+            - card
+            - gcash
+            - paymaya
+        require_auth:
+          description: Indicates whether 3D Secure authentication shall be required for card payments. Always have a value `true`.
+          type: boolean
+          default: true
+          example: true
+    HTTPNotFoundError:
+      title: HTTPNotFoundError
+      type: object
+      properties:
+        message:
+          title: Error message
+          type: string
+          example: Payment Request pr_XN0VEahgsuC77vj does not exist.
+        error:
+          type: object
+          properties:
+            type:
+              title: Error type
+              type: string
+              example: not_found
+            message:
+              title: Error message
+              type: string
+              example: Payment Request pr_XN0VEahgsuC77vj does not exist.
+    HTTPValidationError:
+      title: HTTPValidationError
+      type: object
+      properties:
+        message:
+          title: Error message
+          type: string
+          example: 'Missing parameter: customer'
+        error:
+          type: object
+          properties:
+            type:
+              title: Error type
+              type: string
+              example: invalid_request_error
+            message:
+              title: Error message
+              type: string
+              example: 'Missing parameter: customer'
+    LineItemSerializer:
+      required:
+        - amount
+        - name
+        - quantity
+      properties:
+        amount:
+          description: Unit amount of the product in cents represented as a whole integer.
+          type: integer
+          example: 4999
+        description:
+          description: A description of the product
+          type: string
+          nullable: true
+          example: Annual Fee
+        image:
+          description: A secure URL to an image of the product
+          type: string
+          nullable: true
+        name:
+          description: The name of the product
+          type: string
+          example: Magpie Elite Membership
+        quantity:
+          description: The quantity of the products being purchased
+          type: integer
+          example: 1
+          minimum: 0
+    ListRequestsSerializer:
+      title: ListRequestsSerializer
+      properties:
+        total:
+          description: The total number of Payment Requests.
+          type: integer
+          example: 100
+        previous:
+          description: The URL for the previous page of Payment Requests.
+          type: string
+          nullable: true
+          example: null
+        next:
+          description: The URL for the next page of Payment Requests.
+          type: string
+          nullable: true
+          example: https://request.magpie.im/api/v1/requests?page=2
+        count:
+          description: The number of Payment Requests returned in this response.
+          type: integer
+          example: 10
+        data:
+          description: An array of Payment Requests.
+          type: array
+          items:
+            $ref: '#/components/schemas/ReadRequestSerializer'
+    PaymentMethodType:
+      type: string
+      enum:
+        - card
+        - bpi
+        - gcash
+        - paymaya
+        - alipay
+        - unionpay
+        - wechat
+    ReadRequestSerializer:
+      title: ReadRequestSerializer
+      properties:
+        id:
+          description: The unique identifier of the Payment Request.
+          type: string
+          example: pr_017b996e4a6a9cea9562902021febc6b
+        object:
+          description: String representing the object's type. Objects of the same type share the same value.
+          type: string
+          value: payment_request
+        account_name:
+          description: The name of the merchant who created the Payment Request.
+          type: string
+          example: Magpie Fitness
+        account_support_email:
+          description: The support email of the merchant who created the Payment Request.
+          type: string
+          nullable: true
+          example: fitness-support@magpie.im
+        branding:
+          allOf:
+            - $ref: '#/components/schemas/BrandingType'
+        created:
+          description: Time at which the object was created. Measured in seconds since the Unix epoch.
+          type: string
+          format: timestamp
+          example: 1616425200
+        currency:
+          description: Three-letter [ISO currency code](https://www.iso.org/iso-4217-currency-codes.html), in lowercase. Must be a supported currency.
+          type: string
+          example: PHP
+        customer:
+          description: The ID of the customer who will receive the Payment Request.
+          type: string
+          example: cus_017b996e4a6a9cea9562902021febc6b
+        customer_name:
+          description: The name of the customer .
+          type: string
+          example: Gerry Isaac
+        customer_phone:
+          description: The phone number of the customer.
+          type: string
+          nullable: true
+          example: '+639123456789'
+        delivery_methods:
+          description: The methods by which the customer will receive the Payment Request.
+          type: array
+          items:
+            type: string
+          example:
+            - email
+            - sms
+        delivered:
+          description: Indicates the status whether the Payment Request has been delivered to the customer.
+          type: object
+          properties:
+            email:
+              description: Indicates the status whether the Payment Request has been delivered to the customer via email.
+              type: boolean
+              example: true
+            sms:
+              description: Indicates the status whether the Payment Request has been delivered to the customer via SMS.
+              type: boolean
+              example: false
+        line_items:
+          title: LineItem[]
+          description: A list of items the customer will be billed for.
+          type: array
+          items:
+            $ref: '#/components/schemas/LineItemSerializer'
+        livemode:
+          description: Has the value of `true` if the object exists in live mode or the value of `false` if the object exists in test mode.
+          type: boolean
+          example: true
+        message:
+          description: A custom message to be included in the Payment Request.
+          type: string
+          nullable: true
+          example: Thank you for continuing your membership!
+        metadata:
+          description: A set of key-value pairs that you can attach to the Payment Request. It can be useful for storing additional information about the invoice in a structured format.
+          type: object
+          additionalProperties:
+            type: string
+          example: { 'Member ID': '123456' }
+        number:
+          description: A unique, identifying string that follows a specific pattern. It is used to identify the Payment Request associated to a customer.
+          type: string
+          example: EDE58F9E-0001
+        paid:
+          description: Indicates the status whether the Payment Request has been paid by the customer.
+          type: boolean
+          example: false
+        paid_at:
+          description: Time at which the Payment Request was paid. Measured in seconds since the Unix epoch.
+          type: string
+          format: timestamp
+          nullable: true
+          example: null
+        payment_details:
+          description: The `charge` object details associated with the Payment Request after successful payment.
+          type: object
+          nullable: true
+          example: null
+        payment_method_types:
+          title: PaymentMethod[]
+          description: The payment methods that are available for the customer to pay the Payment Request.
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentMethodType'
+          example:
+            - card
+            - gcash
+            - paymaya
+        payment_request_url:
+          description: The URL where the customer can view and pay the Payment Request.
+          type: string
+          example: https://request.magpie.im/pr_017b996e4a6a9cea9562902021febc6b
+        require_auth:
+          description: Indicates whether 3D Secure authentication shall be required for card payments. Always have a value `true`.
+          type: boolean
+          default: true
+          example: true
+        subtotal:
+          description: The total amount of the Payment Request before any discounts or taxes are applied.
+          type: integer
+          example: 4999
+        total:
+          description: The total amount of the Payment Request after any discounts or taxes are applied.
+          type: integer
+          example: 4999
+        updated:
+          description: Time at which the object was last updated. Measured in seconds since the Unix epoch.
+          type: string
+          format: timestamp
+          example: 1616425200
+        voided:
+          description: Indicates the status whether the Payment Request has been voided by the merchant.
+          type: boolean
+          example: false
+        voided_at:
+          description: Time at which the Payment Request was voided. Measured in seconds since the Unix epoch.
+          type: string
+          format: timestamp
+          nullable: true
+          example: null
+        void_reason:
+          description: The reason provided by the Merchant why the Payment Request was voided.
+          type: string
+          nullable: true
+          example: null
+  securitySchemes:
+    HTTPBasic:
+      type: http
+      scheme: basic

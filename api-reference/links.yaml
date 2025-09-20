@@ -1,0 +1,578 @@
+openapi: 3.0.2
+info:
+  title: Payment Links API
+  version: 1.0.0
+servers:
+  - url: https://buy.magpie.im/api
+    description: Production server for Magpie Payment Links API
+paths:
+  /v1/links:
+    post:
+      tags:
+        - Payment Link
+      summary: Create a payment link
+      description: Creates a payment link.
+      operationId: create-link
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateLink'
+              example:
+                allow_adjustable_quantity: true
+                currency: PHP
+                internal_name: '12.12 Mega Sale'
+                line_items:
+                  - amount: 999
+                    description: Charcoal, Large
+                    image: https://example.com/image.png
+                    name: Zip Mens Shirt
+                    quantity: 20
+                    remaining: 10
+                payment_method_types:
+                  - card
+                  - gcash
+                  - paymaya
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadLink'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - HTTPBasic: []
+    get:
+      tags:
+        - Payment Link
+      summary: List all payment links
+      description: Returns a list of your payment links.
+      operationId: list-links
+      parameters:
+        - name: page
+          in: query
+          description: The page number to return.
+          required: false
+          schema:
+            type: integer
+            example: 2
+        - name: limit
+          in: query
+          description: The number of items to return per page.
+          required: false
+          schema:
+            type: integer
+            example: 10
+        - name: status
+          in: query
+          description: The status of the Payment Requests to return.
+          required: false
+          schema:
+            type: string
+            enum:
+              - active
+              - deactivated
+          example: active
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListLinks'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - HTTPBasic: []
+  /v1/links/{id}:
+    get:
+      tags:
+        - Payment Link
+      summary: Retrieve payment link
+      description: Retrieve a payment link.
+      operationId: retrieve-link
+      parameters:
+        - name: id
+          in: path
+          description: The unique identifier of the Payment Link.
+          required: true
+          schema:
+            type: string
+            example: plink_215NRW1v1Gg847dx
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadLink'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPNotFoundError'
+      security:
+        - HTTPBasic: []
+    put:
+      tags:
+        - Payment Link
+      summary: Update a payment link
+      description: Updates a payment link.
+      operationId: update-link
+      parameters:
+        - name: id
+          in: path
+          description: The unique identifier of the Payment Link.
+          required: true
+          schema:
+            type: string
+            example: plink_215NRW1v1Gg847dx
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateLink'
+              example:
+                allow_adjustable_quantity: false
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadLink'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      security:
+        - HTTPBasic: []
+  /v1/links/{id}/activate:
+    post:
+      tags:
+        - Payment Link
+      summary: Activate payment link
+      description: Activates a deactivated payment link.
+      operationId: activate-link
+      parameters:
+        - name: id
+          in: path
+          description: The unique identifier of the Payment Link.
+          required: true
+          schema:
+            type: string
+            example: plink_215NRW1v1Gg847dx
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadLink'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPNotFoundError'
+      security:
+        - HTTPBasic: []
+  /v1/links/{id}/deactivate:
+    post:
+      tags:
+        - Payment Link
+      summary: Deactivate payment link
+      description: Deactivates an active payment link.
+      operationId: deactivate-link
+      parameters:
+        - name: id
+          in: path
+          description: The unique identifier of the Payment Link.
+          required: true
+          schema:
+            type: string
+            example: plink_215NRW1v1Gg847dx
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReadLink'
+        '404':
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPNotFoundError'
+      security:
+        - HTTPBasic: []
+components:
+  schemas:
+    BrandingType:
+      title: Branding
+      description: Details on branding elements to apply when rendering the Payment Link page.
+      type: object
+      properties:
+        icon:
+          description: A secure URL to an image icon
+          type: string
+          nullable: true
+          example: https://example.com/icon.png
+        logo:
+          description: A secure URL to an image logo
+          type: string
+          nullable: true
+          example: https://example.com/logo.png
+        use_logo:
+          description: Has the value of true if logo should be rendered in payment page or false if icon should be used.
+          type: boolean
+          example: true
+        primary_color:
+          description: A hex color code that will be used as background color of the Payment Link page
+          type: string
+          nullable: true
+          example: '#FFFFFF'
+        secondary_color:
+          description: A hex color code that will be used as color of the submit button and links
+          type: string
+          nullable: true
+          example: '#4f99fe'
+    CreateLink:
+      title: CreateLink
+      required:
+        - allow_adjustable_quantity
+        - currency
+        - internal_name
+        - line_items
+        - payment_method_types
+      properties:
+        allow_adjustable_quantity:
+          description: Has the value of `true` if the quantity of the line items can be adjusted by the customer or false if the quantity is fixed.
+          type: boolean
+          example: true
+        branding:
+          $ref: '#/components/schemas/BrandingType'
+          example:
+            icon: https://example.com/icon.png
+            logo: https://example.com/logo.png
+            use_logo: true
+            primary_color: '#FFFFFF'
+            secondary_color: '#4f99fe'
+        currency:
+          description: Three-letter [ISO currency code](https://www.iso.org/iso-4217-currency-codes.html), in lowercase. Must be a supported currency.
+          type: string
+          example: PHP
+        description:
+          description: A description for the Payment Link.
+          type: string
+          nullable: true
+          example: null
+        expiry:
+          description: The date when the Payment Link will automatically expire. The format is `MM/DD/YYYY`.
+          type: string
+          format: date
+          example: 12/31/2022
+        internal_name:
+          description: A reference name for the Payment Link that is only visible to the merchant for easy identification.
+          type: string
+          example: '12.12 Mega Sale'
+        line_items:
+          description: A list of line items that will be displayed in the Payment Link page.
+          type: array
+          items:
+            $ref: '#/components/schemas/LineItem'
+          example:
+            - amount: 999
+              description: Charcoal, Large
+              image: https://example.com/image.png
+              name: Zip Mens Shirt
+              quantity: 20
+              remaining: 10
+        metadata:
+          description: A set of key-value pairs that you can attach to the Payment Link. It can be used to store additional information about the Payment Link.
+          type: object
+          additionalProperties:
+            type: string
+          optional: true
+        payment_method_types:
+          title: PaymentMethod[]
+          description: The payment methods that are available for the customer to pay the Payment Link.
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentMethodType'
+          example:
+            - card
+            - gcash
+            - paymaya
+        phone_number_collection:
+          description: Describes whether to collect the customer's phone number at Checkout.
+          type: boolean
+          example: true
+        redirect_url:
+          description: The URL to redirect the customer to after the payment is successful.
+          type: string
+          nullable: true
+          example: https://example.com/success
+        require_auth:
+          description: Indicates whether 3D Secure authentication shall be required for card payments. Always have a value `true`.
+          type: boolean
+          default: true
+          value: true
+        shipping_address_collection:
+          - $ref: '#/components/schemas/ShippingAddressCollection'
+    HTTPNotFoundError:
+      title: HTTPNotFoundError
+      type: object
+      properties:
+        message:
+          title: Error message
+          type: string
+          example: Payment link pl_123456 does not exist.
+        error:
+          type: object
+          properties:
+            type:
+              title: Error type
+              type: string
+              example: not_found
+            message:
+              title: Error message
+              type: string
+              example: Payment link pl_123456 does not exist.
+    HTTPValidationError:
+      title: HTTPValidationError
+      type: object
+      properties:
+        message:
+          title: Error message
+          type: string
+          example: 'Missing parameter: currency'
+        error:
+          type: object
+          properties:
+            type:
+              title: Error type
+              type: string
+              example: invalid_request_error
+            message:
+              title: Error message
+              type: string
+              example: 'Missing parameter: currency'
+    LineItem:
+      required:
+        - amount
+        - name
+        - quantity
+      properties:
+        amount:
+          description: Unit amount of the product in cents represented as a whole integer.
+          type: integer
+          example: 999
+        description:
+          description: A description of the product
+          type: string
+          nullable: true
+          example: Charcoal, Large
+        image:
+          description: A secure URL to an image of the product
+          type: string
+          nullable: true
+        name:
+          description: The name of the product
+          type: string
+          example: Zip Mens Shirt
+        quantity:
+          description: The total number of stocks for the product
+          type: integer
+          example: 20
+          minimum: 0
+        remaining:
+          description: The total number of stocks remaining for the product
+          type: integer
+          example: 10
+          minimum: 0
+    ListLinks:
+      title: ListLinks
+      properties:
+        total:
+          description: The total number of Payment Links.
+          type: integer
+          example: 100
+        previous:
+          description: The URL for the previous page of Payment Links.
+          type: string
+          nullable: true
+          example: null
+        next:
+          description: The URL for the next page of Payment Links.
+          type: string
+          nullable: true
+          example: https://buy.magpie.im/api/v1/links?page=2
+        count:
+          description: The number of Payment Links returned in this response.
+          type: integer
+          example: 10
+        data:
+          title: PaymentLink[]
+          description: An array of Payment Links.
+          type: array
+          items:
+            $ref: '#/components/schemas/ReadLink'
+    PaymentMethodType:
+      type: string
+      enum:
+        - card
+        - bpi
+        - gcash
+        - paymaya
+        - alipay
+        - unionpay
+        - wechat
+    ReadLink:
+      title: ReadLink
+      properties:
+        id:
+          description: The unique identifier of the Payment Link.
+          type: string
+          example: plink_215NRW1v1Gg847dx
+        object:
+          description: String representing the object's type. Objects of the same type share the same value.
+          type: string
+          value: payment_link
+        active:
+          description: Has the value of `true` if the Payment Link is accessible or `false` otherwise.
+          type: boolean
+          example: true
+        allow_adjustable_quantity:
+          description: Has the value of `true` if the quantity of the line items can be adjusted by the customer or `false` otherwise.
+          type: boolean
+          example: true
+        branding:
+          $ref: '#/components/schemas/BrandingType'
+          example:
+            icon: https://example.com/icon.png
+            logo: https://example.com/logo.png
+            use_logo: true
+            primary_color: '#FFFFFF'
+            secondary_color: '#4f99fe'
+        created:
+          description: Time at which the object was created. Measured in seconds since the Unix epoch.
+          type: string
+          format: timestamp
+          example: 1635779916046
+        currency:
+          description: Three-letter [ISO currency code](https://www.iso.org/iso-4217-currency-codes.html), in lowercase. Must be a supported currency.
+          type: string
+          example: PHP
+        description:
+          description: A description for the Payment Link.
+          type: string
+          nullable: true
+          example: null
+        expiry:
+          description: The date when the Payment Link will automatically expire. The format is `MM/DD/YYYY`.
+          type: string
+          format: date
+          example: 12/31/2022
+        internal_name:
+          description: A reference name for the Payment Link that is only visible to the merchant for easy identification.
+          type: string
+          example: '12.12 Mega Sale'
+        line_items:
+          description: A list of line items that will be displayed in the Payment Link page.
+          type: array
+          items:
+            $ref: '#/components/schemas/LineItem'
+          example:
+            - amount: 999
+              description: Charcoal, Large
+              image: https://example.com/image.png
+              name: Zip Mens Shirt
+              quantity: 20
+              remaining: 10
+        livemode:
+          description: Has the value of `true` if the object exists in live mode or the value of `false` if the object exists in test mode.
+          type: boolean
+          example: true
+        maximum_payments:
+          description: The maximum number of payments that can be made to the Payment Link.
+          type: integer
+          nullable: true
+          example: null
+        metadata:
+          description: A set of key-value pairs that you can attach to the Payment Link. It can be used to store additional information about the Payment Link.
+          type: object
+          additionalProperties:
+            type: string
+          example: {}
+        payment_method_types:
+          title: PaymentMethod[]
+          description: The payment methods that are available for the customer to pay the Payment Link.
+          type: array
+          items:
+            $ref: '#/components/schemas/PaymentMethodType'
+          example:
+            - card
+            - gcash
+            - paymaya
+        phone_number_collection:
+          description: Describes whether to collect the customer's phone number at Checkout.
+          type: boolean
+          example: true
+        redirect_url:
+          description: The URL to redirect the customer to after the payment is successful.
+          type: string
+          nullable: true
+          example: null
+        require_auth:
+          description: Indicates whether 3D Secure authentication shall be required for card payments. Always have a value `true`.
+          type: boolean
+          default: true
+          value: true
+        shipping_address_collection:
+          - $ref: '#/components/schemas/ShippingAddressCollection'
+        updated:
+          description: Time at which the object was last updated. Measured in seconds since the Unix epoch.
+          type: string
+          format: timestamp
+          example: 1635779916046
+        url:
+          description: The URL of the Payment Link.
+          type: string
+          example: https://buy.magpie.im/gW0550U
+    ShippingAddressCollection:
+      title: ShippingAddressCollection
+      description: Describes whether to collect the customer's shipping address at Checkout.
+      type: object
+      required:
+        - allowed_countries
+      properties:
+        allowed_countries:
+          description: A list of two-letter ISO country codes. Checkout will only collect shipping address from customers in these countries.
+          type: array
+          items:
+            type: string
+          example:
+            - PH
+            - SG
+
+  securitySchemes:
+    HTTPBasic:
+      type: http
+      scheme: basic
