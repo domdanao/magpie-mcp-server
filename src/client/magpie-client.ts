@@ -11,13 +11,18 @@ export class MagpieClient {
 
   constructor(config: MagpieConfig) {
     this.config = config;
-    
+
     // Create separate axios instances for different APIs and authentication
-    this.paymentsApiPublic = this.createApiInstance('https://api.pay.magpie.im', true);  // Uses public key
-    this.paymentsApiSecret = this.createApiInstance('https://api.pay.magpie.im', false); // Uses secret key
-    this.checkoutApi = this.createApiInstance('https://api.pay.magpie.im', false);       // Uses secret key
-    this.requestsApi = this.createApiInstance('https://request.magpie.im/api', false);  // Uses secret key
-    this.linksApi = this.createApiInstance('https://buy.magpie.im/api', false);         // Uses secret key
+    const paymentsBaseUrl = config.paymentsBaseUrl || 'https://api.pay.magpie.im';
+    const checkoutBaseUrl = config.checkoutBaseUrl || 'https://api.pay.magpie.im';
+    const requestsBaseUrl = config.requestsBaseUrl || 'https://request.magpie.im/api';
+    const linksBaseUrl = config.linksBaseUrl || 'https://buy.magpie.im/api';
+
+    this.paymentsApiPublic = this.createApiInstance(paymentsBaseUrl, true);  // Uses public key
+    this.paymentsApiSecret = this.createApiInstance(paymentsBaseUrl, false); // Uses secret key
+    this.checkoutApi = this.createApiInstance(checkoutBaseUrl, false);       // Uses secret key
+    this.requestsApi = this.createApiInstance(requestsBaseUrl, false);       // Uses secret key
+    this.linksApi = this.createApiInstance(linksBaseUrl, false);             // Uses secret key
   }
 
   private createApiInstance(baseURL: string, usePublicKey: boolean = false): AxiosInstance {
@@ -51,15 +56,27 @@ export class MagpieClient {
   }
 
   private handleApiError(error: AxiosError): ApiResponse {
+    const requestUrl = error.config?.baseURL ? `${error.config.baseURL}${error.config.url}` : error.config?.url || 'Unknown URL';
+    const method = error.config?.method?.toUpperCase() || 'Unknown Method';
+
     if (error.response) {
       // Server responded with error status
+      const errorData = error.response.data;
+      let errorMessage = `${method} ${requestUrl} - HTTP ${error.response.status}: ${error.response.statusText}`;
+
+      if (errorData) {
+        if (typeof errorData === 'string') {
+          errorMessage += `\nResponse: ${errorData}`;
+        } else {
+          errorMessage += `\nResponse: ${JSON.stringify(errorData, null, 2)}`;
+        }
+      }
+
       return {
         success: false,
         error: {
           type: 'api_error',
-          message: error.response.data ? 
-            (typeof error.response.data === 'string' ? error.response.data : JSON.stringify(error.response.data)) :
-            `HTTP ${error.response.status}: ${error.response.statusText}`,
+          message: errorMessage,
           code: error.response.status.toString(),
         }
       };
@@ -69,7 +86,7 @@ export class MagpieClient {
         success: false,
         error: {
           type: 'network_error',
-          message: 'No response received from server',
+          message: `Network error attempting ${method} ${requestUrl} - No response received from server`,
         }
       };
     } else {
@@ -78,7 +95,7 @@ export class MagpieClient {
         success: false,
         error: {
           type: 'unknown_error',
-          message: error.message || 'Unknown error occurred',
+          message: `Error with ${method} ${requestUrl} - ${error.message || 'Unknown error occurred'}`,
         }
       };
     }

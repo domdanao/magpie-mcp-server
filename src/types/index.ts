@@ -2,8 +2,11 @@
 export interface MagpieConfig {
   publicKey: string;  // Used for creating sources
   secretKey: string;  // Used for all other operations (charges, checkout, etc.)
-  baseUrl?: string;
   testMode?: boolean;
+  paymentsBaseUrl?: string;  // Base URL for payments API
+  checkoutBaseUrl?: string;  // Base URL for checkout API
+  requestsBaseUrl?: string;  // Base URL for payment requests API
+  linksBaseUrl?: string;     // Base URL for payment links API
 }
 
 // Common Payment Types
