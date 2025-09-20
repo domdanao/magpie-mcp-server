@@ -1,6 +1,6 @@
 {
   "name": "magpie-mcp-server",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Model Context Protocol server for Magpie Payment Platform APIs. Enables AI agents to process payments, create checkout sessions, manage payment requests, and handle payment links.",
   "main": "dist/index.js",
   "bin": {
