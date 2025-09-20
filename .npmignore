@@ -1,0 +1,17 @@
+# Exclude everything first
+/*
+
+# Then include only what we need
+!/dist/
+!/api-reference/
+!/README.md
+!/package.json
+!/LICENSE
+
+# Still exclude these even if in included directories
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
+*.swp
+*.swo

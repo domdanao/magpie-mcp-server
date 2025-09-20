@@ -46,6 +46,20 @@ export MAGPIE_SECRET_KEY="your_secret_key_here"
 export MAGPIE_TEST_MODE="true"  # Optional: Use test mode (default: false)
 ```
 
+### Environment File Setup
+
+Alternatively, create a `.env` file in your project directory:
+
+```bash
+# Copy the example environment file
+cp .env.example .env
+
+# Edit the .env file with your credentials
+MAGPIE_API_KEY=your_api_key_here
+MAGPIE_SECRET_KEY=your_secret_key_here
+MAGPIE_TEST_MODE=true
+```
+
 ### Using with Claude Desktop
 
 Add the server to your Claude Desktop configuration file:
@@ -70,6 +84,25 @@ Edit `~/Library/Application Support/Claude/claude_desktop_config.json`:
 
 #### Windows
 Edit `%APPDATA%\\Claude\\claude_desktop_config.json` with the same configuration.
+
+#### Local Development Setup
+For local development, you can use the built server directly:
+
+```json
+{
+  "mcpServers": {
+    "magpie": {
+      "command": "node",
+      "args": ["/path/to/magpie-mcp-server/dist/index.js"],
+      "env": {
+        "MAGPIE_API_KEY": "your_api_key_here",
+        "MAGPIE_SECRET_KEY": "your_secret_key_here",
+        "MAGPIE_TEST_MODE": "true"
+      }
+    }
+  }
+}
+```
 
 ## Available Tools
 
@@ -198,6 +231,145 @@ The server provides comprehensive error handling with structured error responses
 - Error type (api_error, network_error, validation_error)
 - Human-readable error messages
 - HTTP status codes when applicable
+
+## Deployment
+
+The Magpie MCP Server is designed to run as a stdio-based process that communicates via the Model Context Protocol. Here are the deployment options:
+
+### 1. Local Development
+
+For development and testing:
+
+```bash
+# Build and run locally
+npm run build
+npm start
+
+# Or run in development mode with hot reload
+npm run dev
+```
+
+### 2. Global Installation
+
+Install globally and run as a system command:
+
+```bash
+# Install globally from source
+npm install -g .
+
+# Or install from npm (when published)
+npm install -g magpie-mcp-server
+
+# Run the server
+magpie-mcp-server
+```
+
+### 3. Process Management
+
+For production environments, use a process manager like PM2:
+
+```bash
+# Install PM2
+npm install -g pm2
+
+# Create PM2 ecosystem file
+cat > ecosystem.config.js << EOF
+module.exports = {
+  apps: [{
+    name: 'magpie-mcp-server',
+    script: 'dist/index.js',
+    env: {
+      MAGPIE_API_KEY: 'your_api_key_here',
+      MAGPIE_SECRET_KEY: 'your_secret_key_here',
+      MAGPIE_TEST_MODE: 'false'
+    },
+    restart_delay: 1000,
+    max_restarts: 10
+  }]
+};
+EOF
+
+# Start with PM2
+pm2 start ecosystem.config.js
+```
+
+### 4. Docker Deployment
+
+Run the server in a Docker container:
+
+```bash
+# Build Docker image
+docker build -t magpie-mcp-server .
+
+# Run container
+docker run -e MAGPIE_API_KEY=your_key \
+           -e MAGPIE_SECRET_KEY=your_secret \
+           -e MAGPIE_TEST_MODE=true \
+           magpie-mcp-server
+```
+
+## Testing
+
+### Manual MCP Protocol Testing
+
+You can test the MCP server manually using stdio:
+
+```bash
+# Build the server first
+npm run build
+
+# Test tools listing
+echo '{"jsonrpc": "2.0", "id": 1, "method": "tools/list", "params": {}}' | node dist/index.js
+
+# Test resources listing  
+echo '{"jsonrpc": "2.0", "id": 2, "method": "resources/list", "params": {}}' | node dist/index.js
+```
+
+### Testing with Claude Desktop
+
+1. Configure Claude Desktop with the server (see Configuration section)
+2. Restart Claude Desktop
+3. Start a new conversation and try payment-related queries
+4. Check that the Magpie tools are available and functioning
+
+### Validation Commands
+
+```bash
+# Validate OpenAPI specifications
+npm install -g @apidevtools/swagger-cli
+swagger-cli validate api-reference/payments.yaml
+swagger-cli validate api-reference/checkout.yaml
+swagger-cli validate api-reference/requests.yaml
+swagger-cli validate api-reference/links.yaml
+
+# Lint YAML files
+pip install yamllint
+yamllint api-reference/
+```
+
+### Troubleshooting
+
+**Server not starting:**
+- Check that all required environment variables are set
+- Verify Node.js version is 18 or higher
+- Ensure the project has been built with `npm run build`
+
+**Claude Desktop integration issues:**
+- Verify the configuration file path and JSON syntax
+- Check Claude Desktop logs for error messages
+- Ensure the server command and path are correct
+- Restart Claude Desktop after configuration changes
+
+**API authentication errors:**
+- Verify your Magpie API credentials are valid
+- Check that you're using the correct test/live mode settings
+- Ensure credentials have the necessary permissions
+
+**Payment processing errors:**
+- Review the error responses for specific details
+- Check that payment method details are valid for your region
+- Verify currency and amount formatting (amounts in cents)
+- Ensure test mode is enabled for development testing
 
 ## Contributing
 

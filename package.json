@@ -1,7 +1,7 @@
 {
   "name": "magpie-mcp-server",
   "version": "1.0.0",
-  "description": "Model Context Protocol server for Magpie Payment APIs",
+  "description": "Model Context Protocol server for Magpie Payment Platform APIs. Enables AI agents to process payments, create checkout sessions, manage payment requests, and handle payment links.",
   "main": "dist/index.js",
   "bin": {
     "magpie-mcp-server": "dist/index.js"
@@ -11,11 +11,37 @@
     "start": "node dist/index.js",
     "dev": "ts-node src/index.ts",
     "watch": "nodemon --exec ts-node src/index.ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "prepublishOnly": "npm run build"
   },
-  "keywords": ["mcp", "magpie", "payments", "api", "server"],
-  "author": "Magpie",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "magpie",
+    "payments",
+    "payment-processing",
+    "api",
+    "server",
+    "ai-tools",
+    "claude",
+    "philippines",
+    "gcash",
+    "maya",
+    "paymaya",
+    "checkout",
+    "payment-links",
+    "payment-requests"
+  ],
+  "author": "Dominick Danao <dominick@example.com>",
   "license": "MIT",
+  "homepage": "https://github.com/dominickdanao/magpie-mcp-server#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dominickdanao/magpie-mcp-server.git"
+  },
+  "bugs": {
+    "url": "https://github.com/dominickdanao/magpie-mcp-server/issues"
+  },
   "type": "commonjs",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.18.1",
