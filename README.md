@@ -19,7 +19,9 @@ The Magpie MCP Server enables AI agents to integrate with Magpie's comprehensive
 
 - Node.js 18+ 
 - npm or yarn
-- Magpie API credentials (API Key and Secret Key)
+- Magpie API credentials (Public Key and Secret Key)
+  - **Public Key**: Used for creating payment sources only
+  - **Secret Key**: Used for all other operations (charges, checkout, payment requests, links)
 
 ### Install from npm (when published)
 
@@ -45,6 +47,15 @@ export MAGPIE_PUBLIC_KEY="your_public_key_here"
 export MAGPIE_SECRET_KEY="your_secret_key_here"
 export MAGPIE_TEST_MODE="true"  # Optional: Use test mode (default: false)
 ```
+
+### Magpie Authentication System
+
+Magpie uses a dual-key authentication system for enhanced security:
+
+- **Public Key (`MAGPIE_PUBLIC_KEY`)**: Used exclusively for creating payment sources. This key can be safely exposed in client-side applications as it only allows source creation.
+- **Secret Key (`MAGPIE_SECRET_KEY`)**: Used for all sensitive operations including charges, retrieving source details, checkout sessions, payment requests, and payment links. This key must be kept secure and should only be used on your server.
+
+The MCP server automatically uses the appropriate key for each operation, ensuring optimal security while providing full API functionality.
 
 ### Environment File Setup
 
