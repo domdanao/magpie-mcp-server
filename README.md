@@ -270,7 +270,7 @@ The server supports all Magpie payment methods:
 - `card` - Credit/debit cards with 3DS authentication
 - `gcash` - GCash digital wallet (Philippines)
 - `maya` / `paymaya` - Maya digital wallet (Philippines)
-- `bpi` - BPI online banking
+- `qrph` - QR PH unified QR code payments (Philippines)
 - `alipay` - Alipay international
 - `unionpay` - UnionPay international  
 - `wechat` - WeChat Pay
