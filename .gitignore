@@ -210,3 +210,6 @@ umd/
 # Package manager lockfiles (choose one)
 # package-lock.json  # Uncomment if using yarn
 # yarn.lock          # Uncomment if using npm
+
+#Ignore vscode AI rules
+.github/instructions/codacy.instructions.md

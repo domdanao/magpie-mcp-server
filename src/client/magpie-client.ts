@@ -161,6 +161,35 @@ export class MagpieClient {
     return this.makeRequest(this.paymentsApiSecret, 'POST', `/v2/charges/${chargeId}/refund`, data);
   }
 
+  async verifyCharge(chargeId: string, data: any): Promise<ApiResponse> {
+    return this.makeRequest(this.paymentsApiSecret, 'POST', `/v2/charges/${chargeId}/verify`, data);
+  }
+
+  // Customers API methods
+  async createCustomer(data: any): Promise<ApiResponse> {
+    return this.makeRequest(this.paymentsApiSecret, 'POST', '/v2/customers/', data);
+  }
+
+  async getCustomer(cusId: string): Promise<ApiResponse> {
+    return this.makeRequest(this.paymentsApiSecret, 'GET', `/v2/customers/${cusId}`);
+  }
+
+  async updateCustomer(cusId: string, data: any): Promise<ApiResponse> {
+    return this.makeRequest(this.paymentsApiSecret, 'PUT', `/v2/customers/${cusId}`, data);
+  }
+
+  async getCustomerByEmail(email: string): Promise<ApiResponse> {
+    return this.makeRequest(this.paymentsApiSecret, 'GET', `/v2/customers/by_email/${email}`);
+  }
+
+  async attachSource(cusId: string, data: any): Promise<ApiResponse> {
+    return this.makeRequest(this.paymentsApiSecret, 'POST', `/v2/customers/${cusId}/sources`, data);
+  }
+
+  async detachSource(cusId: string, srcId: string): Promise<ApiResponse> {
+    return this.makeRequest(this.paymentsApiSecret, 'DELETE', `/v2/customers/${cusId}/sources/${srcId}`);
+  }
+
   // Checkout API methods
   async createCheckoutSession(data: any): Promise<ApiResponse> {
     return this.makeRequest(this.checkoutApi, 'POST', '/', data);

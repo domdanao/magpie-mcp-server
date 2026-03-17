@@ -237,6 +237,85 @@ class MagpieMCPServer {
           ],
         };
 
+      case 'verify_charge':
+        const verifyChargeResult = await this.magpieClient.verifyCharge(args.chargeId, { confirmation_id: args.confirmation_id, otp: args.otp });
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify(verifyChargeResult, null, 2),
+            },
+          ],
+        };
+
+      // Customers
+      case 'create_customer':
+        const createCustomerResult = await this.magpieClient.createCustomer(args);
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify(createCustomerResult, null, 2),
+            },
+          ],
+        };
+
+      case 'get_customer':
+        const getCustomerResult = await this.magpieClient.getCustomer(args.customerId);
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify(getCustomerResult, null, 2),
+            },
+          ],
+        };
+
+      case 'update_customer':
+        const { customerId: updateCusId, ...updateCustomerData } = args;
+        const updateCustomerResult = await this.magpieClient.updateCustomer(updateCusId, updateCustomerData);
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify(updateCustomerResult, null, 2),
+            },
+          ],
+        };
+
+      case 'get_customer_by_email':
+        const getCustomerByEmailResult = await this.magpieClient.getCustomerByEmail(args.email);
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify(getCustomerByEmailResult, null, 2),
+            },
+          ],
+        };
+
+      case 'attach_source_to_customer':
+        const attachSourceResult = await this.magpieClient.attachSource(args.customerId, { source: args.source });
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify(attachSourceResult, null, 2),
+            },
+          ],
+        };
+
+      case 'detach_source_from_customer':
+        const detachSourceResult = await this.magpieClient.detachSource(args.customerId, args.sourceId);
+        return {
+          content: [
+            {
+              type: 'text',
+              text: JSON.stringify(detachSourceResult, null, 2),
+            },
+          ],
+        };
+
       // Checkout Sessions
       case 'create_checkout_session':
         const createCheckoutResult = await this.magpieClient.createCheckoutSession(args);

@@ -134,6 +134,30 @@ export interface CreatePaymentLinkRequest {
   require_auth?: boolean;
 }
 
+// Customer Types
+export interface CreateCustomerRequest {
+  email: string;
+  description: string;
+  mobile_number?: string;
+  metadata?: Record<string, any>;
+}
+
+export interface UpdateCustomerRequest {
+  mobile_number?: string;
+  description?: string;
+  metadata?: Record<string, any>;
+}
+
+export interface AttachSourceRequest {
+  source: string;
+}
+
+// Verify Charge Types
+export interface VerifyChargeRequest {
+  confirmation_id: string;
+  otp: string;
+}
+
 // API Response Types
 export interface ApiResponse<T = any> {
   success: boolean;

@@ -54,6 +54,129 @@ export function createMagpieTools(): Tool[] {
       }
     },
 
+    // Customers
+    {
+      name: 'create_customer',
+      description: 'Create a customer for recurring charges and source management',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          email: {
+            type: 'string',
+            description: "Customer's email address"
+          },
+          description: {
+            type: 'string',
+            description: 'Customer description'
+          },
+          mobile_number: {
+            type: 'string',
+            description: "Customer's mobile number"
+          },
+          metadata: {
+            type: 'object',
+            description: 'Set of key-value pairs for storing additional information'
+          }
+        },
+        required: ['email', 'description']
+      }
+    },
+
+    {
+      name: 'get_customer',
+      description: 'Retrieve details of an existing customer by ID',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          customerId: {
+            type: 'string',
+            description: 'The ID of the customer to retrieve'
+          }
+        },
+        required: ['customerId']
+      }
+    },
+
+    {
+      name: 'update_customer',
+      description: 'Update customer details',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          customerId: {
+            type: 'string',
+            description: 'The ID of the customer to update'
+          },
+          mobile_number: {
+            type: 'string',
+            description: "Customer's mobile number"
+          },
+          description: {
+            type: 'string',
+            description: 'Customer description'
+          },
+          metadata: {
+            type: 'object',
+            description: 'Set of key-value pairs for storing additional information'
+          }
+        },
+        required: ['customerId']
+      }
+    },
+
+    {
+      name: 'get_customer_by_email',
+      description: 'Retrieve details of an existing customer by email address',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          email: {
+            type: 'string',
+            description: 'The email address of the customer to retrieve'
+          }
+        },
+        required: ['email']
+      }
+    },
+
+    {
+      name: 'attach_source_to_customer',
+      description: 'Attach a payment source to a customer for recurring charges',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          customerId: {
+            type: 'string',
+            description: 'The ID of the customer'
+          },
+          source: {
+            type: 'string',
+            description: 'The source ID to attach to the customer'
+          }
+        },
+        required: ['customerId', 'source']
+      }
+    },
+
+    {
+      name: 'detach_source_from_customer',
+      description: 'Detach a payment source from a customer',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          customerId: {
+            type: 'string',
+            description: 'The ID of the customer'
+          },
+          sourceId: {
+            type: 'string',
+            description: 'The source ID to detach from the customer'
+          }
+        },
+        required: ['customerId', 'sourceId']
+      }
+    },
+
     // Payment Charges
     {
       name: 'create_charge',
@@ -176,6 +299,29 @@ export function createMagpieTools(): Tool[] {
           }
         },
         required: ['chargeId']
+      }
+    },
+
+    {
+      name: 'verify_charge',
+      description: 'Verify a charge using a confirmation ID and OTP from the provider',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          chargeId: {
+            type: 'string',
+            description: 'The ID of the charge to verify'
+          },
+          confirmation_id: {
+            type: 'string',
+            description: 'Confirmation ID data from the provider'
+          },
+          otp: {
+            type: 'string',
+            description: 'One-time pin from the provider'
+          }
+        },
+        required: ['chargeId', 'confirmation_id', 'otp']
       }
     },
 
