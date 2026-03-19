@@ -1,102 +1,72 @@
 # Magpie MCP Server
 
-A Model Context Protocol (MCP) server that provides AI agents with access to Magpie Payment Platform APIs. This server exposes all four core Magpie APIs as MCP tools and resources.
+A Model Context Protocol (MCP) server that gives AI agents access to Magpie Payment Platform APIs. Connect your Magpie account to Claude Desktop, OpenClaw, or any MCP-compatible AI agent to process payments, create checkout sessions, send invoices, and manage payment links through natural conversation.
 
 ## Overview
 
-The Magpie MCP Server enables AI agents to integrate with Magpie's comprehensive payment processing system, supporting various payment methods including cards, digital wallets (GCash, Maya), and international payment methods (Alipay, UnionPay, WeChat Pay).
+The Magpie MCP Server exposes all four Magpie APIs as AI-ready tools:
 
-### Supported APIs
+| API | What it does |
+|-----|-------------|
+| **Payments** | Create payment sources, process charges, manage refunds |
+| **Checkout Sessions** | Create hosted checkout pages for collecting payments |
+| **Payment Requests** | Send invoice-style payment requests via email or SMS |
+| **Payment Links** | Create and manage shareable payment links |
 
-1. **Payments API** - Core payment processing with sources and charges
-2. **Checkout Sessions API** - Hosted checkout sessions for payment collection
-3. **Payment Requests API** - Invoice-based payment requests
-4. **Payment Links API** - Shareable payment links
+### Supported Payment Methods
 
-## Installation
+- **Card** — Credit/debit cards with 3D Secure authentication
+- **GCash** — GCash digital wallet (Philippines)
+- **Maya / PayMaya** — Maya digital wallet (Philippines)
+- **QR PH** — QR PH unified QR code payments (Philippines)
+- **Alipay** — Alipay international
+- **UnionPay** — UnionPay international
+- **WeChat Pay** — WeChat Pay
 
-### Prerequisites
+> Not all payment methods are available on all APIs. See [Payment Methods by API](#payment-methods-by-api) for details.
 
-- Node.js 18+
-- npm (for npx)
-- Magpie API credentials (Public Key and Secret Key)
-  - **Public Key**: Used for creating payment sources only
-  - **Secret Key**: Used for all other operations (charges, checkout, payment requests, links)
+## Getting Started
 
-### Recommended: NPX (No Installation Required)
+There are two ways to connect to the Magpie MCP Server:
 
-The easiest way to use the Magpie MCP server is with `npx` - no installation needed! Just add the configuration to Claude Desktop and it will automatically download and run the latest version.
+### Option A: Hosted Server (Recommended)
 
-**Benefits:**
-- ✅ Always uses the latest version
-- ✅ No manual installation or updates
-- ✅ No PATH configuration needed
-- ✅ Works across all platforms
+Connect to Magpie's hosted MCP server. No installation required — your Magpie API keys are set up securely through an OAuth flow in your browser.
 
-### Alternative: Global Installation
+**Requirements:** Node.js 18+ (for `mcp-remote`)
 
-For better performance or offline usage, you can install globally:
+**Claude Desktop configuration:**
 
-```bash
-npm install -g magpie-mcp-server
-```
-
-**Benefits:**
-- ✅ Faster startup (~50ms vs ~200ms)
-- ✅ Works offline after installation
-- ✅ Version control (pin to specific versions)
-
-### Advanced: Build from Source
-
-```bash
-git clone https://github.com/dominickdanao/magpie-mcp-server
-cd magpie-mcp-server
-npm install
-npm run build
-```
-
-## Configuration
-
-The server requires Magpie API credentials to be provided via environment variables:
-
-```bash
-export MAGPIE_PUBLIC_KEY="your_public_key_here"
-export MAGPIE_SECRET_KEY="your_secret_key_here"
-export MAGPIE_TEST_MODE="true"  # Optional: Use test mode (default: false)
-```
-
-### Magpie Authentication System
-
-Magpie uses a dual-key authentication system for enhanced security:
-
-- **Public Key (`MAGPIE_PUBLIC_KEY`)**: Used exclusively for creating payment sources. This key can be safely exposed in client-side applications as it only allows source creation.
-- **Secret Key (`MAGPIE_SECRET_KEY`)**: Used for all sensitive operations including charges, retrieving source details, checkout sessions, payment requests, and payment links. This key must be kept secure and should only be used on your server.
-
-The MCP server automatically uses the appropriate key for each operation, ensuring optimal security while providing full API functionality.
-
-### Environment File Setup
-
-Alternatively, create a `.env` file in your project directory:
-
-```bash
-# Copy the example environment file
-cp .env.example .env
-
-# Edit the .env file with your credentials
-MAGPIE_PUBLIC_KEY=your_public_key_here
-MAGPIE_SECRET_KEY=your_secret_key_here
-MAGPIE_TEST_MODE=false
-```
-
-### Using with Claude Desktop
-
-Add the server to your Claude Desktop configuration file:
-
-#### Recommended: NPX Configuration
-
-Edit your Claude Desktop config:
+Edit your config file:
 - **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
 - **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+
+```json
+{
+  "mcpServers": {
+    "magpie": {
+      "command": "npx",
+      "args": ["mcp-remote", "https://magpie-mcp-server.fly.dev/mcp"]
+    }
+  }
+}
+```
+
+Restart Claude Desktop. On first launch, your browser will open to complete setup:
+
+1. **Register** — your AI client registers with the server automatically
+2. **Enter Magpie API Keys** — paste your Public Key and Secret Key
+3. **Authorize** — grant the AI agent access to your Magpie account
+
+That's it. Your keys are stored securely on the server. On future launches, the connection is automatic.
+
+### Option B: Self-Hosted
+
+Run the MCP server locally on your machine. Your API keys are provided as environment variables.
+
+**Requirements:** Node.js 18+, Magpie API credentials
+
+**Claude Desktop configuration:**
 
 ```json
 {
@@ -106,17 +76,24 @@ Edit your Claude Desktop config:
       "args": ["-y", "magpie-mcp-server"],
       "env": {
         "MAGPIE_PUBLIC_KEY": "your_public_key_here",
-        "MAGPIE_SECRET_KEY": "your_secret_key_here",
-        "MAGPIE_TEST_MODE": "false"
+        "MAGPIE_SECRET_KEY": "your_secret_key_here"
       }
     }
   }
 }
 ```
 
-#### Alternative: Global Installation Configuration
+Restart Claude Desktop. The server starts automatically.
 
-If you installed globally with `npm install -g magpie-mcp-server`:
+#### Alternative: Global Install
+
+For faster startup or offline use:
+
+```bash
+npm install -g magpie-mcp-server
+```
+
+Then use this config:
 
 ```json
 {
@@ -125,332 +102,216 @@ If you installed globally with `npm install -g magpie-mcp-server`:
       "command": "magpie-mcp-server",
       "env": {
         "MAGPIE_PUBLIC_KEY": "your_public_key_here",
-        "MAGPIE_SECRET_KEY": "your_secret_key_here",
-        "MAGPIE_TEST_MODE": "false"
+        "MAGPIE_SECRET_KEY": "your_secret_key_here"
       }
     }
   }
 }
 ```
 
-**Important**: Restart Claude Desktop completely after updating the configuration.
+## Authentication
 
-#### Local Development Setup
-For local development, you can use the built server directly:
+Magpie uses a dual-key authentication system:
 
-```json
-{
-  "mcpServers": {
-    "magpie": {
-      "command": "node",
-      "args": ["/path/to/magpie-mcp-server/dist/index.js"],
-      "env": {
-        "MAGPIE_PUBLIC_KEY": "your_public_key_here",
-        "MAGPIE_SECRET_KEY": "your_secret_key_here",
-        "MAGPIE_TEST_MODE": "true"
-      }
-    }
-  }
-}
-```
+- **Public Key** (`MAGPIE_PUBLIC_KEY`) — Used only for creating payment sources. Safe for client-side use.
+- **Secret Key** (`MAGPIE_SECRET_KEY`) — Used for all other operations (charges, checkout, invoices, links). Must be kept secure.
+
+The MCP server automatically uses the right key for each operation.
+
+**Hosted mode:** Your keys are entered once through the browser-based OAuth flow and stored securely on the server. No keys in config files.
+
+**Self-hosted mode:** Keys are provided as environment variables in your Claude Desktop config or a `.env` file.
 
 ## Available Tools
 
-The MCP server provides the following tools for AI agents:
+The server provides 33 tools organized across 6 categories.
 
 ### Payment Sources
-- `create_source` - Create payment sources (cards, wallets, bank accounts)
-- `get_source` - Retrieve payment source details
+
+| Tool | Description |
+|------|-------------|
+| `create_source` | Create a payment source (card, gcash, maya, bpi, alipay, unionpay, wechat) |
+| `get_source` | Retrieve payment source details by ID |
+
+### Customers
+
+| Tool | Description |
+|------|-------------|
+| `create_customer` | Create a customer record for recurring charges |
+| `get_customer` | Retrieve customer details by ID |
+| `update_customer` | Update customer details (mobile, description, metadata) |
+| `get_customer_by_email` | Look up a customer by email address |
+| `attach_source_to_customer` | Attach a payment source to a customer |
+| `detach_source_from_customer` | Remove a payment source from a customer |
 
 ### Payment Charges
-- `create_charge` - Create payment charges using sources
-- `get_charge` - Retrieve charge details
-- `list_charges` - List all charges with pagination
-- `capture_charge` - Capture authorized charges
-- `void_charge` - Void authorized charges
-- `refund_charge` - Refund captured charges
+
+| Tool | Description |
+|------|-------------|
+| `create_charge` | Create a payment charge using a source. Amount in cents (e.g., 5000 = PHP 50.00) |
+| `get_charge` | Retrieve charge details by ID |
+| `list_charges` | List all charges with pagination |
+| `capture_charge` | Capture a previously authorized charge |
+| `void_charge` | Void an authorized charge before capture |
+| `refund_charge` | Refund a captured charge (full or partial) |
+| `verify_charge` | Verify a charge using confirmation ID and OTP |
 
 ### Checkout Sessions
-- `create_checkout_session` - Create hosted checkout sessions
-- `get_checkout_session` - Retrieve session details
-- `list_checkout_sessions` - List all checkout sessions
-- `expire_checkout_session` - Manually expire sessions
-- `capture_checkout_session` - Capture authorized sessions
+
+| Tool | Description |
+|------|-------------|
+| `create_checkout_session` | Create a hosted checkout page with line items and payment methods |
+| `get_checkout_session` | Retrieve checkout session details |
+| `list_checkout_sessions` | List all checkout sessions |
+| `expire_checkout_session` | Manually expire an active session |
+| `capture_checkout_session` | Capture an authorized checkout session |
 
 ### Payment Requests
-- `create_payment_request` - Create invoice-style payment requests
-- `get_payment_request` - Retrieve payment request details
-- `list_payment_requests` - List payment requests with filters
-- `void_payment_request` - Void payment requests
-- `resend_payment_request` - Resend payment requests to customers
+
+| Tool | Description |
+|------|-------------|
+| `create_payment_request` | Create an invoice-style payment request sent via email or SMS |
+| `get_payment_request` | Retrieve payment request details |
+| `list_payment_requests` | List payment requests with status filters (open, paid, voided) |
+| `void_payment_request` | Void a payment request with a reason |
+| `resend_payment_request` | Resend a payment request to the customer |
 
 ### Payment Links
-- `create_payment_link` - Create shareable payment links
-- `get_payment_link` - Retrieve payment link details
-- `list_payment_links` - List payment links with filters
-- `update_payment_link` - Update payment link settings
-- `activate_payment_link` - Activate deactivated links
-- `deactivate_payment_link` - Deactivate active links
+
+| Tool | Description |
+|------|-------------|
+| `create_payment_link` | Create a shareable payment link with line items |
+| `get_payment_link` | Retrieve payment link details |
+| `list_payment_links` | List payment links with status filters (active, deactivated) |
+| `update_payment_link` | Update payment link settings |
+| `activate_payment_link` | Reactivate a deactivated payment link |
+| `deactivate_payment_link` | Deactivate an active payment link |
 
 ## Available Resources
 
-The server also provides access to API documentation and schemas:
+The server provides API documentation and OpenAPI schemas that AI agents can read for context:
 
-- `magpie://api/payments/schema` - Payments API OpenAPI specification
-- `magpie://api/checkout/schema` - Checkout API OpenAPI specification  
-- `magpie://api/requests/schema` - Payment Requests API OpenAPI specification
-- `magpie://api/links/schema` - Payment Links API OpenAPI specification
+| URI | Description |
+|-----|-------------|
+| `magpie://api/payments/schema` | Payments API OpenAPI specification |
+| `magpie://api/checkout/schema` | Checkout Sessions API OpenAPI specification |
+| `magpie://api/requests/schema` | Payment Requests API OpenAPI specification |
+| `magpie://api/links/schema` | Payment Links API OpenAPI specification |
+| `magpie://api/documentation` | Comprehensive documentation for all Magpie APIs |
+
+## Payment Methods by API
+
+Not all payment methods are available on every API:
+
+| Method | Payments | Checkout | Requests | Links |
+|--------|----------|----------|----------|-------|
+| Card | Yes | Yes | Yes | Yes |
+| GCash | Yes | Yes | Yes | Yes |
+| Maya / PayMaya | Yes | Yes | Yes | Yes |
+| BPI | Yes | Yes | — | — |
+| Alipay | Yes | Yes | — | — |
+| UnionPay | Yes | Yes | — | — |
+| WeChat Pay | Yes | Yes | — | — |
+| QR PH | Yes | — | — | — |
 
 ## Example Usage
 
-Once configured, AI agents can use the Magpie tools naturally. Here are some example scenarios:
+Once connected, you can interact with Magpie through natural conversation with your AI agent:
 
-### Creating a Simple Payment
+### Create a Checkout Session
 
-```
-Agent: I need to create a payment for $50.00 using a credit card.
+> "Create a checkout session for a product called 'Premium Plan' at PHP 999.00. Accept GCash and card payments. Redirect to https://mysite.com/success on completion."
 
-1. First, I'll create a source with the card details
-2. Then create a charge using that source
-```
+The AI agent will call `create_checkout_session` with the right parameters and return the checkout URL.
 
-### Setting up a Checkout Session
+### Send a Payment Request
 
-```
-Agent: I need to create a checkout session for selling a product worth $25.00.
+> "Send an invoice to customer@email.com for PHP 2,500.00 for 'Website Design Services'. Send it via email."
 
-I'll create a checkout session with the product details and payment methods.
-```
+The agent will call `create_payment_request` with email delivery and return the payment request details.
 
-### Managing Payment Requests
+### Create a Payment Link
 
-```
-Agent: I need to send an invoice to a customer for $100.00.
+> "Create a payment link for 'Monthly Subscription' at PHP 499.00 per month. Accept card and Maya."
 
-I'll create a payment request and send it via email.
-```
+The agent will call `create_payment_link` and return the shareable URL.
 
-## Development
+### Check Payment Status
 
-### Project Structure
+> "What's the status of charge chr_abc123?"
 
-```
-src/
-├── client/          # HTTP client for Magpie APIs
-├── tools/           # MCP tool definitions
-├── resources/       # MCP resource definitions  
-├── types/           # TypeScript type definitions
-├── utils/           # Utility functions
-└── index.ts         # Main server implementation
-```
+The agent will call `get_charge` and report whether the charge is pending, paid, refunded, etc.
 
-### Development Commands
+### Refund a Payment
 
-```bash
-# Development mode with hot reload
-npm run dev
+> "Refund PHP 200.00 from charge chr_abc123."
 
-# Build the project
-npm run build
+The agent will call `refund_charge` with a partial refund amount.
 
-# Start the built server
-npm start
+## Configuration Reference
 
-# Watch mode for development
-npm run watch
-```
+For self-hosted mode, the following environment variables are available:
 
-### API Reference
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `MAGPIE_PUBLIC_KEY` | Yes | — | Magpie public API key |
+| `MAGPIE_SECRET_KEY` | Yes | — | Magpie secret API key |
+| `MAGPIE_TEST_MODE` | No | `false` | Enable test mode |
+| `MAGPIE_PAYMENTS_BASE_URL` | No | `https://api.magpie.im` | Payments API base URL |
+| `MAGPIE_CHECKOUT_BASE_URL` | No | `https://api.pay.magpie.im` | Checkout API base URL |
+| `MAGPIE_REQUESTS_BASE_URL` | No | `https://request.magpie.im/api` | Payment Requests API base URL |
+| `MAGPIE_LINKS_BASE_URL` | No | `https://buy.magpie.im/api` | Payment Links API base URL |
 
-All tools follow the patterns defined in the Magpie API documentation. Amounts are specified in cents (e.g., 5000 for $50.00 PHP), and all APIs use HTTP Basic Authentication with API keys.
+You can also create a `.env` file in your project directory with these values.
 
-### Payment Methods
+## Troubleshooting
 
-The server supports all Magpie payment methods:
-- `card` - Credit/debit cards with 3DS authentication
-- `gcash` - GCash digital wallet (Philippines)
-- `maya` / `paymaya` - Maya digital wallet (Philippines)
-- `qrph` - QR PH unified QR code payments (Philippines)
-- `alipay` - Alipay international
-- `unionpay` - UnionPay international  
-- `wechat` - WeChat Pay
+### Claude Desktop doesn't show Magpie tools
 
-### Error Handling
-
-The server provides comprehensive error handling with structured error responses that include:
-- Error type (api_error, network_error, validation_error)
-- Human-readable error messages
-- HTTP status codes when applicable
-
-## Deployment
-
-The Magpie MCP Server is designed to run as a stdio-based process that communicates via the Model Context Protocol. Here are the deployment options:
-
-### 1. Local Development
-
-For development and testing:
-
-```bash
-# Build and run locally
-npm run build
-npm start
-
-# Or run in development mode with hot reload
-npm run dev
-```
-
-### 2. Global Installation
-
-Install globally and run as a system command:
-
-```bash
-# Install globally from source
-npm install -g .
-
-# Or install from npm (when published)
-npm install -g magpie-mcp-server
-
-# Run the server
-magpie-mcp-server
-```
-
-### 3. Process Management
-
-For production environments, use a process manager like PM2:
-
-```bash
-# Install PM2
-npm install -g pm2
-
-# Create PM2 ecosystem file
-cat > ecosystem.config.js << EOF
-module.exports = {
-  apps: [{
-    name: 'magpie-mcp-server',
-    script: 'dist/index.js',
-    env: {
-      MAGPIE_PUBLIC_KEY: 'your_public_key_here',
-      MAGPIE_SECRET_KEY: 'your_secret_key_here',
-      MAGPIE_TEST_MODE: 'false'
-    },
-    restart_delay: 1000,
-    max_restarts: 10
-  }]
-};
-EOF
-
-# Start with PM2
-pm2 start ecosystem.config.js
-```
-
-### 4. Docker Deployment
-
-Run the server in a Docker container:
-
-```bash
-# Build Docker image
-docker build -t magpie-mcp-server .
-
-# Run container
-docker run -e MAGPIE_PUBLIC_KEY=your_public_key \
-           -e MAGPIE_SECRET_KEY=your_secret_key \
-           -e MAGPIE_TEST_MODE=false \
-           magpie-mcp-server
-```
-
-## Testing
-
-### Manual MCP Protocol Testing
-
-You can test the MCP server manually using stdio:
-
-```bash
-# Build the server first
-npm run build
-
-# Test tools listing
-echo '{"jsonrpc": "2.0", "id": 1, "method": "tools/list", "params": {}}' | node dist/index.js
-
-# Test resources listing  
-echo '{"jsonrpc": "2.0", "id": 2, "method": "resources/list", "params": {}}' | node dist/index.js
-```
-
-### Testing with Claude Desktop
-
-1. Configure Claude Desktop with the server (see Configuration section)
-2. Restart Claude Desktop
-3. Start a new conversation and try payment-related queries
-4. Check that the Magpie tools are available and functioning
-
-### Validation Commands
-
-```bash
-# Validate OpenAPI specifications
-npm install -g @apidevtools/swagger-cli
-swagger-cli validate api-reference/payments.yaml
-swagger-cli validate api-reference/checkout.yaml
-swagger-cli validate api-reference/requests.yaml
-swagger-cli validate api-reference/links.yaml
-
-# Lint YAML files
-pip install yamllint
-yamllint api-reference/
-```
-
-### Troubleshooting
-
-**Server not starting:**
-- Check that all required environment variables are set
-- Verify Node.js version is 18 or higher
-- Ensure the project has been built with `npm run build`
-
-**Claude Desktop integration issues:**
-- Verify the configuration file path and JSON syntax
+- Make sure you restarted Claude Desktop **completely** after updating the config
+- Check that the config JSON syntax is valid (no trailing commas, proper quoting)
+- For npx: ensure you have internet connectivity on first run
 - Check Claude Desktop logs for error messages
-- **Important:** Restart Claude Desktop completely after configuration changes
-- **Recommended:** Use the NPX approach to avoid PATH and installation issues
-- If NPX fails, check internet connectivity (NPX requires network access)
-- If using global installation and getting "command not found", switch to NPX approach
-- For global installation PATH issues, try the full path approach:
+
+### "Command not found" errors
+
+- Verify Node.js 18+ is installed: `node --version`
+- For npx issues, try the global install approach instead
+- On macOS with NVM, use the full path to npx in the config:
   ```json
   {
-    "mcpServers": {
-      "magpie": {
-        "command": "node",
-        "args": ["/path/to/magpie-mcp-server/dist/index.js"],
-        "env": {
-          "MAGPIE_PUBLIC_KEY": "your_public_key_here",
-          "MAGPIE_SECRET_KEY": "your_secret_key_here",
-          "MAGPIE_TEST_MODE": "false"
-        }
-      }
+    "command": "/Users/yourname/.nvm/versions/node/v22.16.0/bin/npx",
+    "args": ["-y", "magpie-mcp-server"],
+    "env": {
+      "PATH": "/Users/yourname/.nvm/versions/node/v22.16.0/bin:/usr/bin:/bin"
     }
   }
   ```
 
-**API authentication errors:**
-- Verify your Magpie API credentials are valid
-- Check that you're using the correct test/live mode settings
-- Ensure credentials have the necessary permissions
+### Hosted server: OAuth flow not completing
 
-**Payment processing errors:**
-- Review the error responses for specific details
-- Check that payment method details are valid for your region
-- Verify currency and amount formatting (amounts in cents)
-- Ensure test mode is enabled for development testing
+- Delete the cached auth state and retry: `rm -rf ~/.mcp-auth/`
+- Check that your browser isn't blocking popups from `localhost`
+- Try a different browser if the redirect isn't working
 
-## Contributing
+### API authentication errors
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
+- Verify your Magpie API credentials are valid and active
+- Check that you're using the correct test/live mode
+- For hosted mode: re-enter your keys by deleting `~/.mcp-auth/` and reconnecting
+
+### Payment processing errors
+
+- Amounts are in **cents** (e.g., 5000 = PHP 50.00)
+- Check that the payment method is supported for the API you're using
+- Enable test mode for development testing
+- Review the error message — the server returns specific details from Magpie's API
 
 ## License
 
-MIT License - see LICENSE file for details.
+MIT License — see LICENSE file for details.
 
 ## Support
 
-For issues with the MCP server, please file a GitHub issue. For Magpie API questions, contact Magpie support at support@magpie.im.
+- **MCP Server issues**: [GitHub Issues](https://github.com/domdanao/magpie-mcp-server/issues)
+- **Magpie API questions**: [support@magpie.im](mailto:support@magpie.im)

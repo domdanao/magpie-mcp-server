@@ -1,15 +1,18 @@
 {
   "name": "magpie-mcp-server",
-  "version": "1.2.8",
+  "version": "2.0.0",
   "description": "Model Context Protocol server for Magpie Payment Platform APIs. Enables AI agents to process payments, create checkout sessions, manage payment requests, and handle payment links.",
   "main": "dist/index.js",
   "bin": {
-    "magpie-mcp-server": "dist/index.js"
+    "magpie-mcp-server": "dist/index.js",
+    "magpie-mcp-http-server": "dist/http-server.js"
   },
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
+    "start:http": "node dist/http-server.js",
     "dev": "ts-node src/index.ts",
+    "dev:http": "ts-node src/http-server.ts",
     "watch": "nodemon --exec ts-node src/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1",
     "prepublishOnly": "npm run build"
@@ -46,14 +49,21 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.18.1",
     "axios": "^1.12.2",
+    "cors": "^2.8.6",
     "dotenv": "^17.2.2",
+    "express": "^5.2.1",
     "js-yaml": "^4.1.0",
+    "pg": "^8.20.0",
     "zod": "^3.25.76"
   },
   "devDependencies": {
+    "@flydotio/dockerfile": "^0.7.10",
+    "@types/cors": "^2.8.19",
     "@types/dotenv": "^6.1.1",
+    "@types/express": "^5.0.6",
     "@types/js-yaml": "^4.0.9",
     "@types/node": "^24.5.2",
+    "@types/pg": "^8.18.0",
     "nodemon": "^3.1.10",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.2"
