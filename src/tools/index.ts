@@ -2,6 +2,17 @@ import { Tool } from '@modelcontextprotocol/sdk/types.js';
 
 export function createMagpieTools(): Tool[] {
   return [
+    // Account
+    {
+      name: 'get_me',
+      description: 'Get your Magpie merchant account information including account name, status, payment method settings, rates, payout settings, and branding',
+      inputSchema: {
+        type: 'object',
+        properties: {},
+        required: []
+      }
+    },
+
     // Payment Sources
     {
       name: 'create_source',

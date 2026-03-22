@@ -92,6 +92,9 @@ async function main() {
   // Express app
   const app = express();
 
+  // Trust the first proxy (Fly.io) so express-rate-limit reads X-Forwarded-For correctly
+  app.set('trust proxy', 1);
+
   // CORS — expose Mcp-Session-Id for browser-based clients
   app.use(
     cors({

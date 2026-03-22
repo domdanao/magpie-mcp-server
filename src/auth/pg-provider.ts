@@ -13,7 +13,7 @@ import {
 } from '@modelcontextprotocol/sdk/shared/auth.js';
 import { AuthInfo } from '@modelcontextprotocol/sdk/server/auth/types.js';
 import { PgClientsStore } from './pg-clients.js';
-import { authorizeSetupHTML } from '../onboarding.js';
+import { authorizeSetupHTML, authSuccessHTML } from '../onboarding.js';
 
 export class PgOAuthProvider implements OAuthServerProvider {
   private _clientsStore: PgClientsStore;
@@ -82,7 +82,7 @@ export class PgOAuthProvider implements OAuthServerProvider {
       redirectUrl.searchParams.set('state', params.state);
     }
 
-    res.redirect(redirectUrl.toString());
+    res.type('html').send(authSuccessHTML(redirectUrl.toString()));
   }
 
   async challengeForAuthorizationCode(

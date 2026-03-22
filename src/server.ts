@@ -116,6 +116,10 @@ async function handleToolCall(magpieClient: MagpieClient, name: string, args: an
   });
 
   switch (name) {
+    // Account
+    case 'get_me':
+      return formatResult(await magpieClient.getMe());
+
     // Payment Sources
     case 'create_source':
       return formatResult(await magpieClient.createSource(args));

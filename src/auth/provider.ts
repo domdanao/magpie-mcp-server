@@ -12,7 +12,7 @@ import {
 } from '@modelcontextprotocol/sdk/shared/auth.js';
 import { AuthInfo } from '@modelcontextprotocol/sdk/server/auth/types.js';
 import { InMemoryClientsStore } from './clients.js';
-import { authorizeSetupHTML } from '../onboarding.js';
+import { authorizeSetupHTML, authSuccessHTML } from '../onboarding.js';
 
 interface AuthorizationRecord {
   clientId: string;
@@ -98,7 +98,7 @@ export class MagpieOAuthProvider implements OAuthServerProvider {
       redirectUrl.searchParams.set('state', params.state);
     }
 
-    res.redirect(redirectUrl.toString());
+    res.type('html').send(authSuccessHTML(redirectUrl.toString()));
   }
 
   async challengeForAuthorizationCode(

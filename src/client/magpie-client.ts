@@ -124,6 +124,11 @@ export class MagpieClient {
     }
   }
 
+  // Account
+  async getMe(): Promise<ApiResponse> {
+    return this.makeRequest(this.paymentsApiSecret, 'GET', '/v2/me');
+  }
+
   // Payments API methods
   async createSource(data: any): Promise<ApiResponse> {
     // Source creation uses public key

@@ -329,6 +329,70 @@ async function doSetKeys() {
 </html>`;
 }
 
+export function authSuccessHTML(redirectUrl: string): string {
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Magpie MCP Server — Authorized</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f7fa; color: #1a1a2e; line-height: 1.6; }
+  .container { max-width: 520px; margin: 0 auto; padding: 80px 20px; text-align: center; }
+  .card { background: #fff; border-radius: 12px; padding: 40px 32px; border: 1px solid #e2e8f0; }
+  .icon { font-size: 3rem; margin-bottom: 16px; }
+  h1 { font-size: 1.5rem; margin-bottom: 8px; color: #16a34a; }
+  .message { color: #666; margin-bottom: 24px; font-size: 0.95rem; }
+  .redirect-info { font-size: 0.85rem; color: #999; }
+  .redirect-info a { color: #6366f1; text-decoration: none; }
+  .redirect-info a:hover { text-decoration: underline; }
+  .close-hint { margin-top: 20px; font-size: 0.85rem; color: #999; padding: 12px; background: #f8fafc; border-radius: 8px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="card">
+    <div class="icon">&#10003;</div>
+    <h1>Authorization Successful</h1>
+    <p class="message">Your Magpie API keys have been saved and validated. The application is now authorized.</p>
+    <p class="redirect-info" id="redirectMsg">Redirecting back to the application...</p>
+    <p class="close-hint" id="closeHint" style="display:none">
+      The redirect could not reach the application. This is normal — your authorization is complete.<br>
+      You can <strong>close this tab</strong> and return to your app.
+    </p>
+  </div>
+</div>
+<script>
+(function() {
+  var url = ${JSON.stringify(redirectUrl)};
+  // Try to redirect via fetch first to detect if the local server is up
+  var img = new Image();
+  var timer = setTimeout(function() {
+    // After 3 seconds, redirect anyway
+    window.location.href = url;
+  }, 1500);
+
+  // Redirect immediately
+  window.location.href = url;
+
+  // If we're still here after 2s, the redirect target is probably down
+  setTimeout(function() {
+    document.getElementById('redirectMsg').textContent = 'If you are not redirected, click the link below:';
+    var link = document.createElement('a');
+    link.href = url;
+    link.textContent = 'Click here to continue';
+    link.style.display = 'block';
+    link.style.marginTop = '8px';
+    document.getElementById('redirectMsg').appendChild(link);
+    document.getElementById('closeHint').style.display = 'block';
+  }, 3000);
+})();
+</script>
+</body>
+</html>`;
+}
+
 export function authorizeSetupHTML(params: {
   clientId: string;
   clientName?: string;
