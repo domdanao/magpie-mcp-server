@@ -4,6 +4,7 @@ import {
   OAuthServerProvider,
   AuthorizationParams,
 } from '@modelcontextprotocol/sdk/server/auth/provider.js';
+import { InvalidTokenError } from '@modelcontextprotocol/sdk/server/auth/errors.js';
 import { OAuthRegisteredClientsStore } from '@modelcontextprotocol/sdk/server/auth/clients.js';
 import {
   OAuthClientInformationFull,
@@ -157,12 +158,12 @@ export class MagpieOAuthProvider implements OAuthServerProvider {
   async verifyAccessToken(token: string): Promise<AuthInfo> {
     const record = this.accessTokens.get(token);
     if (!record) {
-      throw new Error('Invalid access token');
+      throw new InvalidTokenError('Invalid access token');
     }
 
     if (Date.now() / 1000 > record.expiresAt) {
       this.accessTokens.delete(token);
-      throw new Error('Access token expired');
+      throw new InvalidTokenError('Access token expired');
     }
 
     return {

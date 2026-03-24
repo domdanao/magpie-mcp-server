@@ -5,6 +5,7 @@ import {
   OAuthServerProvider,
   AuthorizationParams,
 } from '@modelcontextprotocol/sdk/server/auth/provider.js';
+import { InvalidTokenError } from '@modelcontextprotocol/sdk/server/auth/errors.js';
 import { OAuthRegisteredClientsStore } from '@modelcontextprotocol/sdk/server/auth/clients.js';
 import {
   OAuthClientInformationFull,
@@ -153,7 +154,7 @@ export class PgOAuthProvider implements OAuthServerProvider {
       [token]
     );
     if (rows.length === 0) {
-      throw new Error('Invalid access token');
+      throw new InvalidTokenError('Invalid access token');
     }
 
     const record = rows[0];
@@ -161,7 +162,7 @@ export class PgOAuthProvider implements OAuthServerProvider {
 
     if (Date.now() / 1000 > expiresAt) {
       await this.pool.query('DELETE FROM access_tokens WHERE token = $1', [token]);
-      throw new Error('Access token expired');
+      throw new InvalidTokenError('Access token expired');
     }
 
     return {
