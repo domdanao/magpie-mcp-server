@@ -22,7 +22,7 @@ export function createMagpieTools(): Tool[] {
         properties: {
           type: {
             type: 'string',
-            enum: ['card', 'gcash', 'maya', 'paymaya', 'bpi', 'alipay', 'unionpay', 'wechat'],
+            enum: ['card', 'gcash', 'maya', 'paymaya', 'bpi', 'alipay', 'unionpay', 'wechat', 'grabpay', 'instapay', 'qrph'],
             description: 'The type of payment method'
           },
           card: {
@@ -379,7 +379,7 @@ export function createMagpieTools(): Tool[] {
             type: 'array',
             items: {
               type: 'string',
-              enum: ['card', 'gcash', 'maya', 'bpi', 'alipay', 'unionpay', 'wechat']
+              enum: ['card', 'gcash', 'maya', 'paymaya', 'bpi', 'alipay', 'unionpay', 'wechat', 'grabpay', 'instapay', 'qrph']
             },
             description: 'Allowed payment methods'
           },
@@ -492,7 +492,7 @@ export function createMagpieTools(): Tool[] {
             type: 'array',
             items: {
               type: 'string',
-              enum: ['card', 'gcash', 'maya', 'paymaya']
+              enum: ['card', 'gcash', 'maya', 'paymaya', 'bpi', 'alipay', 'unionpay', 'wechat', 'grabpay', 'instapay', 'qrph']
             },
             description: 'Allowed payment methods'
           },
@@ -616,7 +616,7 @@ export function createMagpieTools(): Tool[] {
             type: 'array',
             items: {
               type: 'string',
-              enum: ['card', 'gcash', 'paymaya']
+              enum: ['card', 'gcash', 'maya', 'paymaya', 'bpi', 'alipay', 'unionpay', 'wechat', 'grabpay', 'instapay', 'qrph']
             },
             description: 'Allowed payment methods'
           },
