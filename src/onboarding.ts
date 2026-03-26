@@ -415,6 +415,7 @@ export function authorizeSetupHTML(params: {
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f7fa; color: #1a1a2e; line-height: 1.6; }
   .container { max-width: 520px; margin: 0 auto; padding: 60px 20px; }
   .card { background: #fff; border-radius: 12px; padding: 32px; border: 1px solid #e2e8f0; }
+  .logo { display: block; width: 56px; height: 56px; border-radius: 12px; margin-bottom: 16px; }
   h1 { font-size: 1.5rem; margin-bottom: 4px; }
   .subtitle { color: #666; margin-bottom: 24px; font-size: 0.95rem; }
   .app-name { font-weight: 600; color: #6366f1; }
@@ -439,6 +440,7 @@ export function authorizeSetupHTML(params: {
 <body>
 <div class="container">
   <div class="card">
+    <img src="/logo.png" alt="Magpie" class="logo">
     <h1>Authorize Access</h1>
     <p class="subtitle"><span class="app-name">${esc(params.clientName || params.clientId)}</span> wants to connect to Magpie payments.</p>
     <p class="info">Enter your Magpie API keys from your <a href="https://dashboard.magpie.im" target="_blank">Magpie Dashboard</a> to authorize this application.</p>

@@ -4,6 +4,7 @@ import * as dotenv from 'dotenv';
 dotenv.config();
 
 import crypto from 'crypto';
+import path from 'path';
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
@@ -20,7 +21,7 @@ import { PgOAuthProvider } from './auth/pg-provider.js';
 import { createPool, initSchema, startTokenCleanup } from './db.js';
 import { MagpieConfig } from './types/index.js';
 import { MagpieClient } from './client/magpie-client.js';
-import { onboardingHTML } from './onboarding.js';
+import { landingPageHTML } from './landing.js';
 import { Pool } from 'pg';
 
 // ---------------------------------------------------------------------------
@@ -105,9 +106,15 @@ async function main() {
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
 
-  // Onboarding page — served before OAuth router so GET / shows the UI
+  // Static assets (logo, etc.)
+  const publicDir = path.resolve(__dirname, '..', 'public');
+  app.get('/logo.png', (_req: Request, res: Response) => {
+    res.sendFile(path.join(publicDir, 'logo.png'));
+  });
+
+  // Landing page
   app.get('/', (_req: Request, res: Response) => {
-    res.type('html').send(onboardingHTML(issuerUrl.toString()));
+    res.type('html').send(landingPageHTML());
   });
 
   // ---------------------------------------------------------------------------

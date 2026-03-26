@@ -46,7 +46,7 @@ Edit your config file:
   "mcpServers": {
     "magpie": {
       "command": "npx",
-      "args": ["mcp-remote", "https://magpie-mcp-server.fly.dev/mcp"]
+      "args": ["mcp-remote", "https://mcp.magpie.im/mcp"]
     }
   }
 }
