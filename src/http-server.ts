@@ -106,11 +106,9 @@ async function main() {
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
 
-  // Static assets (logo, etc.)
+  // Static assets (favicon, logo, webmanifest, etc.)
   const publicDir = path.resolve(__dirname, '..', 'public');
-  app.get('/logo.png', (_req: Request, res: Response) => {
-    res.sendFile(path.join(publicDir, 'logo.png'));
-  });
+  app.use(express.static(publicDir));
 
   // Landing page
   app.get('/', (_req: Request, res: Response) => {
