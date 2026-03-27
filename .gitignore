@@ -213,3 +213,7 @@ umd/
 
 #Ignore vscode AI rules
 .github/instructions/codacy.instructions.md
+
+# Source assets (already copied/implemented)
+magpie-logo-new-500px.png
+public/html_snippet.html
