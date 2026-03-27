@@ -287,6 +287,68 @@ export function landingPageHTML(): string {
     overflow-x: auto;
   }
 
+  /* FAQ */
+  .faq-list { display: grid; gap: 12px; }
+  .faq-item {
+    background: var(--bg-raised);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .faq-q {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 16px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 0.9rem;
+    color: var(--text);
+    user-select: none;
+    transition: background 0.1s;
+  }
+  .faq-q:hover { background: var(--bg-code); }
+  .faq-q::before {
+    content: '+';
+    font-family: var(--mono);
+    font-size: 1rem;
+    color: var(--text-dimmer);
+    flex-shrink: 0;
+    width: 20px;
+    text-align: center;
+    transition: transform 0.15s;
+  }
+  .faq-item.open .faq-q::before { content: '\\2212'; }
+  .faq-a {
+    display: none;
+    padding: 0 16px 16px 46px;
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    line-height: 1.6;
+  }
+  .faq-item.open .faq-a { display: block; }
+  .faq-a code {
+    font-family: var(--mono);
+    font-size: 0.8em;
+    background: var(--bg-code);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2px 6px;
+  }
+  .faq-a pre {
+    background: var(--bg-code);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 12px 14px;
+    margin: 8px 0;
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    overflow-x: auto;
+    line-height: 1.5;
+  }
+  .faq-a p { margin-bottom: 8px; }
+  .faq-a p:last-child { margin-bottom: 0; }
+
   /* Footer */
   footer {
     padding: 40px 0;
@@ -508,6 +570,66 @@ export function landingPageHTML(): string {
     <span class="syn-punc">}</span>
   <span class="syn-punc">}</span>
 <span class="syn-punc">}</span></pre></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section>
+    <h2>FAQ</h2>
+    <div class="faq-list">
+      <div class="faq-item">
+        <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">"Failed to spawn process: No such file or directory"</div>
+        <div class="faq-a">
+          <p>Claude Desktop is a GUI app and doesn't inherit your shell's <code>PATH</code>. If you use a Node version manager (NVM, fnm, Volta, Herd), the bare <code>npx</code> command won't be found.</p>
+          <p>Fix: use the <strong>full path</strong> to <code>npx</code> and add its directory to <code>env.PATH</code>:</p>
+<pre>{
+  "mcpServers": {
+    "magpie": {
+      "command": "/full/path/to/npx",
+      "args": ["mcp-remote", "https://mcp.magpie.im/mcp"],
+      "env": {
+        "PATH": "/full/path/to/node/bin:/usr/local/bin:/usr/bin:/bin"
+      }
+    }
+  }
+}</pre>
+          <p>Find your path by running <code>which npx</code> in a terminal.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">How do I re-authorize or switch API keys?</div>
+        <div class="faq-a">
+          <p>The <code>mcp-remote</code> bridge caches OAuth tokens locally. To force a fresh authorization flow, delete the cache and restart Claude Desktop:</p>
+<pre>rm -rf ~/.mcp-auth/</pre>
+          <p>The next time Claude Desktop connects, your browser will open the authorization page where you can enter new API keys.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">Where are my API keys stored?</div>
+        <div class="faq-a">
+          <p>Your Magpie API keys are stored <strong>server-side</strong> in an encrypted PostgreSQL database, associated with your OAuth client. They never leave the server.</p>
+          <p>Your local machine only stores an OAuth access token (in <code>~/.mcp-auth/</code>) which authenticates requests to the MCP server. The access token expires after 1 hour and is automatically refreshed.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">Do I need to install anything?</div>
+        <div class="faq-a">
+          <p>You need <strong>Node.js 18+</strong> installed (for the <code>npx</code> and <code>mcp-remote</code> commands). No other installation is required&mdash;the hosted server handles everything else.</p>
+          <p>If you prefer to self-host, you can install the server from npm with <code>npm install -g magpie-mcp-server</code> and provide your own API keys as environment variables.</p>
+        </div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">What can I ask Claude to do with Magpie?</div>
+        <div class="faq-a">
+          <p>Anything the Magpie API supports. Examples:</p>
+          <p>&bull; "Charge 500 PHP to the customer's GCash"<br>
+          &bull; "Create a checkout session for 1,200 PHP with card and Maya"<br>
+          &bull; "Send a payment request for 3,000 PHP to juan@example.com"<br>
+          &bull; "Create a reusable payment link for 250 PHP"<br>
+          &bull; "Show me all charges from today"<br>
+          &bull; "Refund charge ch_abc123"</p>
+        </div>
       </div>
     </div>
   </section>
