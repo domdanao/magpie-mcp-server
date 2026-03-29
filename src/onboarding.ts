@@ -376,27 +376,23 @@ export function authSuccessHTML(redirectUrl: string): string {
 <script>
 (function() {
   var url = ${JSON.stringify(redirectUrl)};
-  // Try to redirect via fetch first to detect if the local server is up
-  var img = new Image();
-  var timer = setTimeout(function() {
-    // After 3 seconds, redirect anyway
-    window.location.href = url;
-  }, 1500);
 
-  // Redirect immediately
-  window.location.href = url;
-
-  // If we're still here after 2s, the redirect target is probably down
-  setTimeout(function() {
-    document.getElementById('redirectMsg').textContent = 'If you are not redirected, click the link below:';
-    var link = document.createElement('a');
-    link.href = url;
-    link.textContent = 'Click here to continue';
-    link.style.display = 'block';
-    link.style.marginTop = '8px';
-    document.getElementById('redirectMsg').appendChild(link);
-    document.getElementById('closeHint').style.display = 'block';
-  }, 3000);
+  // Probe the callback URL first. If the local server (mcp-remote) is
+  // reachable, redirect normally. If it's gone, stay on this page so the
+  // user sees the success message instead of Chrome's "connection refused".
+  fetch(url, { mode: 'no-cors', redirect: 'follow' })
+    .then(function() {
+      // Server responded (opaque 0 is fine) — safe to redirect
+      window.location.href = url;
+    })
+    .catch(function() {
+      // Connection refused — mcp-remote is gone. Show close hint.
+      document.getElementById('redirectMsg').innerHTML =
+        'Authorization is complete but the local app could not be reached.' +
+        '<br>You can <strong>close this tab</strong> and restart your AI app — it will connect automatically.' +
+        '<br><a href="' + url + '" style="color:#6366f1;margin-top:8px;display:inline-block;">Or click here to try redirecting manually</a>';
+      document.getElementById('closeHint').style.display = 'block';
+    });
 })();
 </script>
 </body>

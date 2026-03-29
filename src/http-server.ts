@@ -22,6 +22,7 @@ import { createPool, initSchema, startTokenCleanup } from './db.js';
 import { MagpieConfig } from './types/index.js';
 import { MagpieClient } from './client/magpie-client.js';
 import { landingPageHTML } from './landing.js';
+import { installPageHTML } from './install.js';
 import { Pool } from 'pg';
 
 // ---------------------------------------------------------------------------
@@ -113,6 +114,11 @@ async function main() {
   // Landing page
   app.get('/', (_req: Request, res: Response) => {
     res.type('html').send(landingPageHTML());
+  });
+
+  // Install guide
+  app.get('/install', (_req: Request, res: Response) => {
+    res.type('html').send(installPageHTML());
   });
 
   // ---------------------------------------------------------------------------

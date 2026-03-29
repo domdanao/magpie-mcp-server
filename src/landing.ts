@@ -384,6 +384,7 @@ export function landingPageHTML(): string {
     <h1>Magpie MCP Server</h1>
     <p>Connect AI agents to the Magpie Payment Platform. Process payments, create checkouts, send invoices, and manage payment links through natural conversation.</p>
     <div class="hero-links">
+      <a href="/install">Install</a>
       <a href="https://github.com/domdanao/magpie-mcp-server">GitHub</a>
       <a href="https://www.npmjs.com/package/magpie-mcp-server">npm</a>
       <a href="/.well-known/oauth-authorization-server">OAuth Metadata</a>
@@ -639,6 +640,7 @@ export function landingPageHTML(): string {
 <footer>
   <div class="container">
     <div class="footer-links">
+      <a href="/install">Install</a>
       <a href="https://github.com/domdanao/magpie-mcp-server">GitHub</a>
       <a href="https://www.npmjs.com/package/magpie-mcp-server">npm</a>
       <a href="https://dashboard.magpie.im">Magpie Dashboard</a>
