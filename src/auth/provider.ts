@@ -198,7 +198,7 @@ export class MagpieOAuthProvider implements OAuthServerProvider {
     this.refreshTokens.set(refreshToken, {
       clientId,
       scopes,
-      expiresAt: expiresAt + this.tokenExpirySeconds * 24, // refresh token lasts 24x longer
+      expiresAt: expiresAt + this.tokenExpirySeconds * 2, // refresh token lasts 3x longer (90 days if access is 30)
       resource,
     });
 

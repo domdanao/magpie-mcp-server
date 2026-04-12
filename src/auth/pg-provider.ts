@@ -186,7 +186,8 @@ export class PgOAuthProvider implements OAuthServerProvider {
     const accessToken = crypto.randomBytes(32).toString('hex');
     const refreshToken = crypto.randomBytes(32).toString('hex');
     const expiresAt = Math.floor(Date.now() / 1000) + this.tokenExpirySeconds;
-    const refreshExpiresAt = expiresAt + this.tokenExpirySeconds * 24;
+    // Refresh tokens last 3x longer than access tokens (90 days if access is 30 days)
+    const refreshExpiresAt = expiresAt + this.tokenExpirySeconds * 2;
     const resourceStr = resource?.toString() || null;
 
     await this.pool.query(

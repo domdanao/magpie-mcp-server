@@ -54,6 +54,11 @@ export async function initSchema(pool: Pool): Promise<void> {
   `);
 }
 
+/**
+ * Starts a background job to clean up expired tokens and stale authorization codes.
+ * Runs every 60 seconds by default. With 30-day access tokens and 90-day refresh tokens,
+ * this prevents the database from accumulating stale credentials.
+ */
 export function startTokenCleanup(pool: Pool, intervalMs: number = 60_000): NodeJS.Timeout {
   return setInterval(async () => {
     const now = Math.floor(Date.now() / 1000);

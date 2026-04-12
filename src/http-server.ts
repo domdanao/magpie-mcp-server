@@ -72,7 +72,8 @@ class InMemoryEventStore {
 async function main() {
   const PORT = parseInt(process.env.PORT || '3000', 10);
   const issuerUrl = new URL(process.env.MCP_AUTH_ISSUER_URL || `http://localhost:${PORT}`);
-  const tokenExpiry = parseInt(process.env.MCP_AUTH_TOKEN_EXPIRY || '3600', 10);
+  // Default to 30 days (2592000 seconds) to prevent auth storms after sleep/wake cycles
+  const tokenExpiry = parseInt(process.env.MCP_AUTH_TOKEN_EXPIRY || '2592000', 10);
 
   // OAuth provider — use PostgreSQL if DATABASE_URL is set, otherwise in-memory
   const databaseUrl = process.env.DATABASE_URL;
